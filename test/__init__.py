@@ -1,6 +1,11 @@
+def ok(condition, actual):
+  print 'PASS' if condition else 'FAIL "%s"' actual
+
+  return condition
+
 def equal(actual, expected):
-  equal = expected == actual
+  condition = expected == actual
 
-  print 'PASS' if equal else 'FAIL "%s" "%s"' % (actual, expected)
+  print 'PASS' if condition else 'FAIL "%s" "%s"' % (actual, expected)
 
-  return equal
+  return condition
