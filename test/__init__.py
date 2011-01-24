@@ -19,3 +19,85 @@ def equal(actual, expect):
 
 def expect(count):
   config['expect'] = count
+
+from twisted.internet import defer, protocol
+from twisted.mail import smtp
+
+class Message:
+  def __init__(self):
+    self.data = []
+
+  def eomReceived(self):
+    equal("\n".join(self.data) + "\n", self.expect['data'])
+
+    return defer.succeed(None)
+
+  def lineReceived(self, line):
+    self.data.append(line)
+
+class Server(smtp.ESMTP):
+  def do_UNKNOWN(self, rest):
+    raise
+
+  def receivedHeader(self, helo, origin, recipients):
+    pass
+
+  def validateFrom(self, helo, origin):
+    self.expect = self.expect.pop(0)
+
+    equal(str(origin), self.expect['from'])
+
+    return origin
+
+  def validateTo(self, user):
+    equal(str(user), self.expect['to'].pop(0))
+
+    message = Message()
+    message.expect = self.expect
+
+    return lambda: message
+
+# ESMTPFactory doesn't exist
+class ServerFactory(smtp.SMTPFactory):
+  protocol = Server
+
+  def buildProtocol(self, addr):
+    protocol = smtp.SMTPFactory.buildProtocol(self, addr)
+    protocol.expect = self.expect.pop(0)
+
+    return protocol
+
+class Client(smtp.ESMTPClient):
+
+  # Shortcut ESMTPClient.__init__(), no authentication or TLS
+  def __init__(self, *args, **kw):
+    self.secret = None
+
+    return smtp.SMTPClient.__init__(self, 'example.com', *args, **kw)
+
+  def getMailData(self):
+    return self.message['data']
+
+  def getMailFrom(self):
+    return self.message['from']
+
+  def getMailTo(self):
+    return self.message['to']
+
+  def smtpState_from(self, code, resp):
+    self.message = self.factory.message.pop(0)
+
+    return smtp.ESMTPClient.smtpState_from(self, code, resp)
+
+  def smtpState_msgSent(self, code, resp):
+    if self.factory.message:
+      self._from = None
+      self.toAddressesResult = []
+
+      return self.smtpState_from(code, resp)
+
+    # No more messages to send
+    self._disconnectFromServer()
+
+class ClientFactory(protocol.ClientFactory):
+  protocol = Client
