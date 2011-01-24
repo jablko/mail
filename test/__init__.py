@@ -29,7 +29,7 @@ class Message:
 
   def eomReceived(self):
     try:
-      equal("\n".join(self.data) + "\n", self.expect['data'])
+      equal("\n".join(self.data) + "\n", self.item['data'])
 
     except KeyError:
       pass
@@ -40,6 +40,11 @@ class Message:
     self.data.append(line)
 
 class Server(smtp.ESMTP):
+  def __init__(self, *args, **kw):
+    self.expect = []
+
+    return smtp.ESMTP.__init__(self, *args, **kw)
+
   def do_UNKNOWN(self, rest):
     raise
 
@@ -47,10 +52,10 @@ class Server(smtp.ESMTP):
     pass
 
   def validateFrom(self, helo, origin):
-    self.expect = self.expect.pop(0)
+    self.item = self.expect.pop(0)
 
     try:
-      equal(str(origin), self.expect['from'])
+      equal(str(origin), self.item['from'])
 
     except KeyError:
       pass
@@ -59,55 +64,48 @@ class Server(smtp.ESMTP):
 
   def validateTo(self, user):
     try:
-      equal(str(user), self.expect['to'].pop(0))
+      equal(str(user), self.item['to'].pop(0))
 
     except KeyError:
       pass
 
     message = Message()
-    message.expect = self.expect
+    message.item = self.item
 
     return lambda: message
 
 # ESMTPFactory doesn't exist
 class ServerFactory(smtp.SMTPFactory):
-  protocol = Server
+  protocol = []
 
   def buildProtocol(self, addr):
-    protocol = smtp.SMTPFactory.buildProtocol(self, addr)
-
-    try:
-      protocol.expect = self.expect.pop(0)
-
-    except AttributeError:
-      pass
-
-    return protocol
+    return self.protocol.pop(0)
 
 class Client(smtp.ESMTPClient):
 
   # Shortcut ESMTPClient.__init__(), no authentication or TLS
   def __init__(self, *args, **kw):
+    self.message = []
     self.secret = None
 
     return smtp.SMTPClient.__init__(self, 'example.com', *args, **kw)
 
   def getMailData(self):
-    return self.message['data']
+    return self.item['data']
 
   def getMailFrom(self):
-    return self.message['from']
+    return self.item['from']
 
   def getMailTo(self):
-    return self.message['to']
+    return self.item['to']
 
   def smtpState_from(self, code, resp):
-    self.message = self.factory.message.pop(0)
+    self.item = self.message.pop(0)
 
     return smtp.ESMTPClient.smtpState_from(self, code, resp)
 
   def smtpState_msgSent(self, code, resp):
-    if self.factory.message:
+    if self.message:
       self._from = None
       self.toAddressesResult = []
 
@@ -117,4 +115,7 @@ class Client(smtp.ESMTPClient):
     self._disconnectFromServer()
 
 class ClientFactory(protocol.ClientFactory):
-  protocol = Client
+  protocol = []
+
+  def buildProtocol(self, addr):
+    return self.protocol.pop(0)
