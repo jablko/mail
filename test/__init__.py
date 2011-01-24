@@ -28,7 +28,11 @@ class Message:
     self.data = []
 
   def eomReceived(self):
-    equal("\n".join(self.data) + "\n", self.expect['data'])
+    try:
+      equal("\n".join(self.data) + "\n", self.expect['data'])
+
+    except KeyError:
+      pass
 
     return defer.succeed(None)
 
@@ -45,12 +49,20 @@ class Server(smtp.ESMTP):
   def validateFrom(self, helo, origin):
     self.expect = self.expect.pop(0)
 
-    equal(str(origin), self.expect['from'])
+    try:
+      equal(str(origin), self.expect['from'])
+
+    except KeyError:
+      pass
 
     return origin
 
   def validateTo(self, user):
-    equal(str(user), self.expect['to'].pop(0))
+    try:
+      equal(str(user), self.expect['to'].pop(0))
+
+    except KeyError:
+      pass
 
     message = Message()
     message.expect = self.expect
@@ -63,7 +75,12 @@ class ServerFactory(smtp.SMTPFactory):
 
   def buildProtocol(self, addr):
     protocol = smtp.SMTPFactory.buildProtocol(self, addr)
-    protocol.expect = self.expect.pop(0)
+
+    try:
+      protocol.expect = self.expect.pop(0)
+
+    except AttributeError:
+      pass
 
     return protocol
 
