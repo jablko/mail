@@ -40,10 +40,10 @@ class Message:
     self.data.append(line)
 
 class Server(smtp.ESMTP):
-  def __init__(self, *args, **kw):
+  def __init__(self, *args, **kwds):
     self.expect = []
 
-    return smtp.ESMTP.__init__(self, *args, **kw)
+    return smtp.ESMTP.__init__(self, *args, **kwds)
 
   def do_UNKNOWN(self, rest):
     raise
@@ -84,11 +84,11 @@ class ServerFactory(smtp.SMTPFactory):
 class Client(smtp.ESMTPClient):
 
   # Shortcut ESMTPClient.__init__(), no authentication or TLS
-  def __init__(self, *args, **kw):
+  def __init__(self, *args, **kwds):
     self.message = []
     self.secret = None
 
-    return smtp.SMTPClient.__init__(self, 'example.com', *args, **kw)
+    return smtp.SMTPClient.__init__(self, 'example.com', *args, **kwds)
 
   def getMailData(self):
     return self.item['data']
