@@ -28,7 +28,7 @@ all:
 	${SSH} zcat /usr/share/doc/dbmail-mysql/examples/create_tables.mysql.gz \| mysql -u dbmail dbmail
 
 	${SSH} sudo sh -c 'echo "
-smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+smtpd_recipient_restrictions = permit_mynetworks permit_sasl_authenticated reject_unauth_destination
 smtpd_sasl_auth_enable = yes
 
 smtpd_milters = inet:localhost:8891
