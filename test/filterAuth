@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+
+import base64
+from mail.test import *
+from qwer import *
+from untwisted import rfc5234, rfc5321, rfc5322, smtp, tcp
+
+expect(3)
+
+@sdfg
+def _():
+  listen = tcp.listen(1438)
+
+  #@listen().then
+  @untwisted.identity(listen().then)
+  class server(smtp.server):
+
+    @untwisted.each
+    def mail():
+      ctx = yield
+
+      class sample(smtp.server.mail):
+        sender = staticmethod(untwisted.each(lambda: (yield equal('alice@example.com', str((yield))))))
+        recipient = staticmethod(untwisted.each(lambda: (yield equal('bob@example.com', str((yield))))))
+
+        @staticmethod
+        @untwisted.each
+        def content():
+          content = yield
+
+          # Upstream client authenticated,
+          # http://thread.gmane.org/gmane.mail.postfix.user/215958
+          protocol = 'ESMTPA'
+
+          With = qwer(rfc5322.CFWS, 'with', rfc5322.FWS, protocol)
+          optInfo = qwer('(?:', rfc5321.via, ')?', With, '(?:', rfc5321.id, ')?(?:', rfc5321.For, ')?(?:', rfc5321.additionalRegisteredClauses, ')?')
+          stamp = qwer(rfc5321.fromDomain, rfc5321.byDomain, optInfo, '(?:', rfc5322.CFWS, ')?;', rfc5322.FWS, rfc5322.dateTime)
+          timeStampLine = qwer('Received:', rfc5322.FWS, stamp, rfc5234.CRLF)
+
+          yield ok(qwer(timeStampLine, '\r\n'.join(('From: notAlice@example\.com',
+            '',
+            'Expect'))).match(content), content)
+
+      ctx = yield sample.__get__(ctx)()
+
+      # QUIT
+      yield smtp.server.mail.__get__(ctx)()
+
+  @untwisted.call
+  @promise.continuate
+  def _():
+    while True:
+      ok(False, (yield listen()))
+
+  connect = tcp.connect('localhost', 'smtp')
+
+  #@connect().then
+  @untwisted.identity(connect().then)
+  class client(smtp.client):
+
+    @untwisted.each
+    def mail():
+      ctx = yield
+
+      ctx.transport.write(str(smtp.command('AUTH PLAIN', base64.b64encode('\0' + username + '\0' + password))))
+
+      ctx.reply()
+
+      class sample(smtp.client.mail):
+        sender = iter(('alice@example.com',)).next
+        recipient = iter(('bob@example.com',)).next
+        content = iter(('\r\n'.join(('From: notAlice@example.com',
+          '',
+          'Expect')),)).next
+
+      yield sample.__get__(ctx)()
+
+  return server
