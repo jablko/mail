@@ -45,7 +45,7 @@ virtual_mailbox_domains = nottheoilrig.com" >> /etc/postfix/main.cf'
 
 	${SSH} sudo a2enmod authn_dbd proxy_http
 
-	${SSH} sudo sed -i 's/^<\/VirtualHost>/  DBDriver mysql\n  DBDParams "dbname=dbmail user=dbmail"\n\n  <Location \/>\n\n    AuthType Basic\n    AuthName nottheoilrig\n    AuthBasicProvider dbd\n    # http://jdbates.blogspot.com/2011/01/recently-required-little-research-to.html\n    AuthDBDUserPWQuery "SELECT ENCRYPT(passwd) FROM dbmail_users WHERE userid = %s"\n    Require valid-user\n\n    ProxyPass http:\/\/localhost:8743/\n\n  <\/Location>\n\n<\/VirtualHost>/g' /etc/apache2/sites-available/default
+	${SSH} sudo sed -i 's/^<\/VirtualHost>/  DBDriver mysql\n  DBDParams "dbname=dbmail user=dbmail"\n\n  <Location \/>\n\n    AuthType Basic\n    AuthName nottheoilrig\n    AuthBasicProvider dbd\n\n    # http:\/\/jdbates.blogspot.com\/2011\/01\/recently-required-little-research-to.html\n    AuthDBDUserPWQuery "SELECT ENCRYPT(passwd) FROM dbmail_users WHERE userid = %s"\n    Require valid-user\n\n    ProxyPass http:\/\/localhost:8743\/\n\n  <\/Location>\n\n<\/VirtualHost>/g' /etc/apache2/sites-available/default
 
 test:
 	# us-east-1 64-bit ebs
