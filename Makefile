@@ -32,9 +32,6 @@ all:
 smtpd_recipient_restrictions = permit_mynetworks permit_sasl_authenticated reject_unauth_destination
 smtpd_sasl_auth_enable = yes
 
-smtpd_milters = inet:localhost:8891
-non_smtpd_milters = inet:localhost:8891
-
 virtual_mailbox_domains = nottheoilrig.com
 virtual_transport = lmtp:localhost" >> /etc/postfix/main.cf'
 
@@ -45,7 +42,9 @@ p
 i\
   -o smtpd_proxy_filter=localhost:1438
 g
-s/^smtp/localhost:1894/' /etc/postfix/master.cf
+s/^smtp/localhost:1894/
+a\
+  -o smtpd_milters=inet:localhost:8891' /etc/postfix/master.cf
 	${SSH} sudo sed -i '/^lmtp/ a\
   -o disable_dns_lookups=yes' /etc/postfix/master.cf
 
