@@ -2,7 +2,7 @@ SSH=ssh -i ${KEYPAIR} ubuntu@${HOSTNAME}
 
 all:
 	# us-east-1 64-bit ebs
-	INSTANCE = `ec2-run-instances ami-548c783d -k ec2-keypair -t t1.micro | sed s/INSTANCE\s+(\S+)`
+	INSTANCE = `ec2-run-instances ami-1aad5273 -k ec2-keypair -t t1.micro | sed s/INSTANCE\s+(\S+)`
 
 	ec2-associate-address 50.16.249.74 -i ${INSTANCE}
 
@@ -49,7 +49,7 @@ virtual_mailbox_domains = nottheoilrig.com" >> /etc/postfix/main.cf'
 
 test:
 	# us-east-1 64-bit ebs
-	INSTANCE = `ec2-run-instances ami-548c783d -k ec2-keypair -t t1.micro | sed s/INSTANCE\s+(\S+)`
+	INSTANCE = `ec2-run-instances ami-1aad5273 -k ec2-keypair -t t1.micro | sed s/INSTANCE\s+(\S+)`
 
 	HOSTNAME = `ec2-describe-instances ${INSTANCE} | sed s/INSTANCE(?:\s+(\S+)){3}`
 
