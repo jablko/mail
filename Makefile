@@ -13,15 +13,15 @@ all:
 	${SSH} sed -i 's/[ -z "$PS1" ] && return/&\n\n# An interactive shell without screen\n[ -z "$STY" ] \&\& exec byobu -xRR/g' .bashrc
 
 	${SSH} sudo aptitude -DR install \
-          apache2 \
-          dbmail-mysql \
-          libaprutil1-dbd-mysql \
-          libsasl2-modules-sql \
+	  apache2 \
+	  dbmail-mysql \
+	  libaprutil1-dbd-mysql \
+	  libsasl2-modules-sql \
 	  mysql-server \
-          opendkim \
+	  opendkim \
 	  postfix \
-          python-mysqldb \
-          python-twisted
+	  python-mysqldb \
+	  python-twisted
 
 	${SSH} mysql -u root -e 'grant all on dbmail.* to dbmail@localhost'
 	${SSH} mysql -u root -e 'create database dbmail character set utf8'
@@ -41,11 +41,11 @@ virtual_mailbox_domains = nottheoilrig.com" >> /etc/postfix/main.cf'
 	${SSH} sudo sed -i 's/^smtp      inet  n       -       -/smtp      inet  n       -       n/;/^lmtp/ a\
   -o disable_dns_lookups=yes' /etc/postfix/master.cf
 
-        ${SSH} sudo sed -i 's/#Domain\(\s\+\).\+/Domain\1nottheoilrig.com/g;s/#KeyFile\(\s\+\).\+/KeyFile\1\/home\/ubuntu\/default.private/g;s/#Selector\(\s\+\).\+/Selector\1mail/g' /etc/opendkim.conf
+	${SSH} sudo sed -i 's/#Domain\(\s\+\).\+/Domain\1nottheoilrig.com/g;s/#KeyFile\(\s\+\).\+/KeyFile\1\/home\/ubuntu\/default.private/g;s/#Selector\(\s\+\).\+/Selector\1mail/g' /etc/opendkim.conf
 
-        ${SSH} sudo a2enmod authn_dbd proxy_http
+	${SSH} sudo a2enmod authn_dbd proxy_http
 
-        ${SSH} sudo sed -i 's/^<\/VirtualHost>/  DBDriver mysql\n  DBDParams "dbname=dbmail user=dbmail"\n\n  <Location \/>\n\n    AuthType Basic\n    AuthName nottheoilrig\n    AuthBasicProvider dbd\n    # http://jdbates.blogspot.com/2011/01/recently-required-little-research-to.html\n    AuthDBDUserPWQuery "SELECT ENCRYPT(passwd) FROM dbmail_users WHERE userid = %s"\n    Require valid-user\n\n    ProxyPass http:\/\/localhost:8743/\n\n  <\/Location>\n\n<\/VirtualHost>/g' /etc/apache2/sites-availalbe/default
+	${SSH} sudo sed -i 's/^<\/VirtualHost>/  DBDriver mysql\n  DBDParams "dbname=dbmail user=dbmail"\n\n  <Location \/>\n\n    AuthType Basic\n    AuthName nottheoilrig\n    AuthBasicProvider dbd\n    # http://jdbates.blogspot.com/2011/01/recently-required-little-research-to.html\n    AuthDBDUserPWQuery "SELECT ENCRYPT(passwd) FROM dbmail_users WHERE userid = %s"\n    Require valid-user\n\n    ProxyPass http:\/\/localhost:8743/\n\n  <\/Location>\n\n<\/VirtualHost>/g' /etc/apache2/sites-availalbe/default
 
 test:
 	# us-east-1 64-bit ebs
