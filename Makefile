@@ -34,8 +34,8 @@ smtpd_sasl_auth_enable = yes
 smtpd_milters = inet:localhost:8891
 non_smtpd_milters = inet:localhost:8891
 
-transport_maps = hash:/etc/postfix/transport
-virtual_mailbox_domains = nottheoilrig.com" >> /etc/postfix/main.cf'
+virtual_mailbox_domains = nottheoilrig.com
+virtual_transport = lmtp:localhost" >> /etc/postfix/main.cf'
 
 	${SSH} sudo sed -i '/^mydestination = / d' /etc/postfix/main.cf
 	${SSH} sudo sed -i 's/^smtp      inet  n       -       -/smtp      inet  n       -       n/;/^lmtp/ a\
