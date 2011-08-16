@@ -44,6 +44,7 @@ i\
 g
 s/^smtp/localhost:1894/
 a\
+  -o smtpd_authorized_xforward_hosts=localhost\
   -o smtpd_milters=inet:localhost:8891' /etc/postfix/master.cf
 	${SSH} sudo sed -i '/^lmtp/ a\
   -o disable_dns_lookups=yes' /etc/postfix/master.cf
