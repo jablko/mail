@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+
+from mail.test import *
+from qwer import *
+from untwisted import rfc5321, smtp, tcp
+
+expect(4)
+
+@sdfg
+def _():
+  listen = tcp.listen(1438)
+
+  #@listen().then
+  @untwisted.identity(listen().then)
+  class server(smtp.server):
+    def start(ctx, command, state):
+      if 'EHLO' == command.verb:
+        ctx.transport.write(str(smtp.reply(250, 'example.com Success', 'XFORWARD NAME ADDR PROTO HELO SOURCE PORT IDENT')))
+
+        return ctx.mail()
+
+      return smtp.server.start(ctx, command, state)
+
+    @untwisted.each
+    def mail():
+      ctx = yield
+
+      class sample(smtp.server.mail):
+        sender = staticmethod(untwisted.each(lambda: (yield equal('alice@example.com', str((yield))))))
+
+        @promise.continuate
+        def start(ctx, command, state):
+          if 'XFORWARD' == command.verb:
+            ok(qwer('XFORWARD NAME=localhost ADDR=127\.0\.0\.1 PORT=\d+ HELO=example\.com IDENT=\[UNAVAILABLE] PROTO=ESMTP SOURCE=LOCAL\r\n').match(str(command)), str(command))
+
+            ctx.ctx.transport.write(str(smtp.reply(250)))
+
+            #return ...
+            raise StopIteration(state((yield ctx.ctx.command()), state))
+
+          #return ...
+          raise StopIteration(smtp.server.mail.start(ctx, command, state))
+
+        recipient = staticmethod(untwisted.each(lambda: (yield equal('bob@example.com', str((yield))))))
+
+        @staticmethod
+        @untwisted.each
+        def content():
+          content = yield
+
+          yield ok(qwer(rfc5321.timeStampLine, '\r\n'.join(('From: notAlice@example\.com',
+            '',
+            'Expect'))).match(content), content)
+
+      ctx = yield sample.__get__(ctx)()
+
+      # QUIT
+      yield smtp.server.mail.__get__(ctx)()
+
+  @untwisted.call
+  @promise.continuate
+  def _():
+    while True:
+      ok(False, (yield listen()))
+
+  connect = tcp.connect('localhost', 'smtp')
+
+  smtp.domain = 'example.com'
+
+  #@connect().then
+  @untwisted.identity(connect().then)
+  class client(smtp.client):
+
+    @untwisted.each
+    def mail():
+      ctx = yield
+
+      class sample(smtp.client.mail):
+        sender = iter(('alice@example.com',)).next
+        recipient = iter(('bob@example.com',)).next
+        content = iter(('\r\n'.join(('From: notAlice@example.com',
+          '',
+          'Expect')),)).next
+
+      yield sample.__get__(ctx)()
+
+  return server
