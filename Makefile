@@ -49,7 +49,10 @@ a\
 	${SSH} sudo sed -i '/^lmtp/ a\
   -o disable_dns_lookups=yes' /etc/postfix/master.cf
 
-	${SSH} sudo sed -i 's/#Domain\(\s\+\).\+/Domain\1nottheoilrig.com/g;s/#KeyFile\(\s\+\).\+/KeyFile\1\/home\/ubuntu\/default.private/g;s/#Selector\(\s\+\).\+/Selector\1mail/g' /etc/opendkim.conf
+	${SSH} sudo sh -c 'echo "
+Domain nottheoilrig.com
+KeyFile /home/ubuntu/default.private
+Selector mail" >> /etc/opendkim.conf'
 
 	${SSH} sudo a2enmod authn_dbd proxy_http
 
