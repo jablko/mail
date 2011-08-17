@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+from mail.test import *
+from twisted.internet import protocol
+from twisted.web import http
+
+expect(1)
+
+@sdfg
+def _():
+
+  @untwisted.call
+  class factory(protocol.ClientFactory):
+    class protocol(http.HTTPClient):
+      def connectionMade(ctx):
+        ctx.sendCommand('GET', '/bob@example.com')
+
+        ctx.endHeaders()
+
+      def handleResponse(ctx, body):
+        pass
+
+      handleStatus = lambda ctx, version, code, phrase: equal('401', code)
+
+  reactor.connectTCP('mail.nottheoilrig.com', 'http', factory)
+
+  return promise.promise()
