@@ -7,7 +7,8 @@ from untwisted import promise
 def sdfg(cbl):
   log.startLogging(sys.stdout)
 
-  cbl().then(lambda _: reactor.stop())
+  # Test complete whether success or exception
+  cbl().then(promise.promise()).then(lambda _: reactor.stop())
 
   reactor.callLater(2, reactor.stop)
   reactor.run()
