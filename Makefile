@@ -10,7 +10,7 @@ all:
 
 	(cd files && find . -type f -exec ${SSH} sudo sh -c 'cat > /{}' < {} \;)
 
-	${SSH} sed -i 's/[ -z "$PS1" ] && return/&\n\n# An interactive shell without screen\n[ -z "$STY" ] \&\& exec byobu -xRR/g' .bashrc
+	${SSH} sed -i 's/[ -z "$PS1" ] && return/&\n\n# An interactive shell without screen\n[ -z "$STY" ] \&\& exec byobu -xRR/' .bashrc
 
 	${SSH} sudo aptitude -DR install \
 	  apache2 \
@@ -56,7 +56,7 @@ Selector mail" >> /etc/opendkim.conf'
 
 	${SSH} sudo a2enmod authn_dbd proxy_http
 
-	${SSH} sudo sed -i 's/^<\/VirtualHost>/  DBDriver mysql\n  DBDParams "dbname=dbmail user=dbmail"\n\n  <Location \/>\n\n    AuthType Basic\n    AuthName nottheoilrig\n    AuthBasicProvider dbd\n\n    # http:\/\/jdbates.blogspot.com\/2011\/01\/recently-required-little-research-to.html\n    AuthDBDUserPWQuery "SELECT ENCRYPT(passwd) FROM dbmail_users WHERE userid = %s"\n    Require valid-user\n\n    ProxyPass http:\/\/localhost:8743\/\n\n  <\/Location>\n\n<\/VirtualHost>/g' /etc/apache2/sites-available/default
+	${SSH} sudo sed -i 's/^<\/VirtualHost>/  DBDriver mysql\n  DBDParams "dbname=dbmail user=dbmail"\n\n  <Location \/>\n\n    AuthType Basic\n    AuthName nottheoilrig\n    AuthBasicProvider dbd\n\n    # http:\/\/jdbates.blogspot.com\/2011\/01\/recently-required-little-research-to.html\n    AuthDBDUserPWQuery "SELECT ENCRYPT(passwd) FROM dbmail_users WHERE userid = %s"\n    Require valid-user\n\n    ProxyPass http:\/\/localhost:8743\/\n\n  <\/Location>\n\n<\/VirtualHost>/' /etc/apache2/sites-available/default
 
 test:
 	# us-east-1 64-bit ebs
