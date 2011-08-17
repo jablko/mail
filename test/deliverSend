@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
+import socket
 from mail.test import *
 from qwer import *
 from untwisted import rfc5321, smtp, tcp
 
-expect(3)
+expect(6)
+
+# Cache our domain
+domain = socket.getfqdn()
 
 @sdfg
 def _():
@@ -12,46 +16,37 @@ def _():
 
   #@listen().then
   @untwisted.identity(listen().then)
-  class server(smtp.server):
-    def start(ctx, command, state):
-      if 'LHLO' == command.verb:
-        ctx.transport.write(str(smtp.reply(250)))
+  @promise.continuate
+  def server(transport):
+    transport.write('220\r\n')
 
-        return ctx.mail()
+    equal('LHLO {}\r\n'.format(domain), (yield transport.protocol.dataReceived.shift()))
 
-      return smtp.server.start(ctx, command, state)
+    transport.write('250\r\n')
 
-    @untwisted.each
-    def mail():
-      ctx = yield
+    equal('MAIL FROM:<test@example.com>\r\n', (yield transport.protocol.dataReceived.shift()))
 
-      class sample(smtp.server.mail):
-        sender = staticmethod(untwisted.each(lambda: (yield equal('test@example.com', str((yield))))))
+    transport.write('250\r\n')
 
-        @promise.continuate
-        def afterSender(ctx, command, state):
-          equal('RCPT TO:<nottheoilrig>\r\n', str(command))
+    equal('RCPT TO:<nottheoilrig>\r\n', (yield transport.protocol.dataReceived.shift()))
 
-          ctx.ctx.transport.write(str(smtp.reply(250)))
+    transport.write('250\r\n')
 
-          #return ...
-          raise StopIteration(ctx.afterRecipient((yield ctx.ctx.command()), ctx.afterRecipient))
+    equal('DATA\r\n', (yield transport.protocol.dataReceived.shift()))
 
-        @staticmethod
-        @untwisted.each
-        def content():
-          content = yield
+    transport.write('354\r\n')
 
-          yield ok(qwer(rfc5321.timeStampLine, rfc5321.timeStampLine, '\r\n'.join(('Date: Fri, 13 Feb 2009 15:31:30 -0800 \(PST\)',
-            'From: notTest@example\.com',
-            'Message-ID: 1234567890@example\.com',
-            '',
-            'Expect'))).match(content), content)
+    ok(qwer(rfc5321.timeStampLine, rfc5321.timeStampLine, '\r\n'.join(('Date: Fri, 13 Feb 2009 15:31:30 -0800 \(PST\)',
+      'From: notTest@example\.com',
+      'Message-ID: 1234567890@example\.com',
+      '',
+      'Expect'))).match((yield transport.protocol.dataReceived.shift())))
 
-      ctx = yield sample.__get__(ctx)()
+    transport.write('250\r\n')
 
-      # QUIT
-      yield smtp.server.mail.__get__(ctx)()
+    equal('QUIT\r\n', (yield transport.protocol.dataReceived.shift()))
+
+    transport.write('221\r\n')
 
   @untwisted.call
   @promise.continuate

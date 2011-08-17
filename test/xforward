@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
+import socket
 from mail.test import *
 from qwer import *
 from untwisted import rfc5321, smtp, tcp
 
-expect(4)
+expect(7)
+
+# Cache our domain
+domain = socket.getfqdn()
 
 @sdfg
 def _():
@@ -12,50 +16,38 @@ def _():
 
   #@listen().then
   @untwisted.identity(listen().then)
-  class server(smtp.server):
-    def start(ctx, command, state):
-      if 'EHLO' == command.verb:
-        ctx.transport.write(str(smtp.reply(250, 'example.com Success', 'XFORWARD NAME ADDR PROTO HELO SOURCE PORT IDENT')))
+  @promise.continuate
+  def server(transport):
+    transport.write('220\r\n')
 
-        return ctx.mail()
+    equal('EHLO {}\r\n'.format(domain), (yield transport.protocol.dataReceived.shift()))
 
-      return smtp.server.start(ctx, command, state)
+    transport.write('250-example.com Success\r\n250 XFORWARD NAME ADDR PROTO HELO SOURCE PORT IDENT\r\n')
 
-    @untwisted.each
-    def mail():
-      ctx = yield
+    ok(qwer('XFORWARD NAME=localhost ADDR=127\.0\.0\.1 PORT=\d+ HELO=example\.com IDENT=\[UNAVAILABLE] PROTO=ESMTP SOURCE=LOCAL\r\n').match((yield transport.protocol.dataReceived.shift())))
 
-      class sample(smtp.server.mail):
-        sender = staticmethod(untwisted.each(lambda: (yield equal('alice@example.com', str((yield))))))
+    transport.write('250\r\n')
 
-        @promise.continuate
-        def start(ctx, command, state):
-          if 'XFORWARD' == command.verb:
-            ok(qwer('XFORWARD NAME=localhost ADDR=127\.0\.0\.1 PORT=\d+ HELO=example\.com IDENT=\[UNAVAILABLE] PROTO=ESMTP SOURCE=LOCAL\r\n').match(str(command)), str(command))
+    equal('MAIL FROM:<alice@example.com>\r\n', (yield transport.protocol.dataReceived.shift()))
 
-            ctx.ctx.transport.write(str(smtp.reply(250)))
+    transport.write('250\r\n')
 
-            #return ...
-            raise StopIteration(state((yield ctx.ctx.command()), state))
+    equal('RCPT TO:<bob@example.com>\r\n', (yield transport.protocol.dataReceived.shift()))
 
-          #return ...
-          raise StopIteration(smtp.server.mail.start(ctx, command, state))
+    transport.write('250\r\n')
 
-        recipient = staticmethod(untwisted.each(lambda: (yield equal('bob@example.com', str((yield))))))
+    equal('DATA\r\n', (yield transport.protocol.dataReceived.shift()))
 
-        @staticmethod
-        @untwisted.each
-        def content():
-          content = yield
+    transport.write('354\r\n')
 
-          yield ok(qwer(rfc5321.timeStampLine, '\r\n'.join(('From: notAlice@example\.com',
-            '',
-            'Expect'))).match(content), content)
+    ok(qwer(rfc5321.timeStampLine, '\r\n'.join(('From: notAlice@example\.com',
+      '',
+      'Expect'))).match((yield transport.protocol.dataReceived.shift())))
 
-      ctx = yield sample.__get__(ctx)()
+    transport.write('250\r\n')
 
-      # QUIT
-      yield smtp.server.mail.__get__(ctx)()
+    # QUIT command not issued to content filter?
+    ok(True, (yield transport.protocol.connectionLost))
 
   @untwisted.call
   @promise.continuate
