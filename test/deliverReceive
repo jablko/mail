@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+
+from mail.test import *
+from twisted.internet import protocol
+from twisted.mail import imap4
+from untwisted import smtp, tcp
+
+expect(1)
+
+@sdfg
+@promise.continuate
+def _():
+  connect = tcp.connect('localhost', 24)
+
+  #@connect().then
+  @untwisted.identity(connect().then)
+  class client(smtp.client):
+    def ehlo(ctx):
+      pass
+
+    @untwisted.each
+    def mail():
+      ctx = yield
+
+      class sample(smtp.client.mail):
+        sender = iter(('test@example.com',)).next
+        recipient = iter(('nottheoilrig',)).next
+
+        # DBMail searches header, not envelope sender : P
+        content = iter(('\r\n'.join(('From: notTest@example.com',
+          '',
+          'Body')),)).next
+
+      yield sample.__get__(ctx)()
+
+  yield client
+
+  @untwisted.call
+  class factory(protocol.ClientFactory):
+    class protocol(imap4.IMAP4Client):
+      store = lambda ctx, sequence, name, value: ctx._store(','.join(map(str, sequence)), name, False, value, False)
+
+      def serverGreeting(ctx, _):
+
+        @untwisted.partial(ctx.authenticators.__setitem__, 'LOGIN')
+        class _:
+
+          @staticmethod
+          @untwisted.each
+          def challengeResponse():
+            yield
+
+            yield username
+
+            yield password
+
+        #@ctx.authenticate(None).addCallback
+        @untwisted.identity(ctx.authenticate(None).addCallback)
+        def _(_):
+
+          #@ctx.select('INBOX').addCallback
+          @untwisted.identity(ctx.select('INBOX').addCallback)
+          def _(_):
+
+            #@ctx.search('FROM "notTest@example.com"').addCallback
+            @untwisted.identity(ctx.search('FROM "notTest@example.com"').addCallback)
+            def _(sequence):
+              if equal(1, len(sequence)):
+
+                #@ctx.store(sequence, '+FLAGS', ('\Deleted',)).addCallback
+                @untwisted.identity(ctx.store(sequence, '+FLAGS', ('\Deleted',)).addCallback)
+                def _(_):
+
+                  # The SELECT, EXAMINE, and LOGOUT commands implicitly close
+                  # the currently selected mailbox without doing an expunge
+
+                  #@ctx.close().addCallback
+                  @untwisted.identity(ctx.close().addCallback)
+                  def _(_):
+                    ctx.logout()
+
+              else:
+                ctx.logout()
+
+  reactor.connectTCP('localhost', 'imap', factory)
+
+  yield promise.promise()

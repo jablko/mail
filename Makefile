@@ -33,7 +33,7 @@ smtpd_recipient_restrictions = permit_mynetworks permit_sasl_authenticated rejec
 smtpd_sasl_auth_enable = yes
 
 virtual_mailbox_domains = nottheoilrig.com
-virtual_transport = lmtp:localhost" >> /etc/postfix/main.cf'
+virtual_transport = lmtp:localhost:8716" >> /etc/postfix/main.cf'
 
 	${SSH} sudo sed -i 'h
 s/^smtp      inet  n       -       -/smtp      inet  n       -       n/

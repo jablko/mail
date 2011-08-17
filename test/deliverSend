@@ -1,0 +1,83 @@
+#!/usr/bin/env python
+
+from mail.test import *
+from qwer import *
+from untwisted import rfc5321, smtp, tcp
+
+expect(3)
+
+@sdfg
+def _():
+  listen = tcp.listen(24)
+
+  #@listen().then
+  @untwisted.identity(listen().then)
+  class server(smtp.server):
+    def start(ctx, command, state):
+      if 'LHLO' == command.verb:
+        ctx.transport.write(str(smtp.reply(250)))
+
+        return ctx.mail()
+
+      return smtp.server.start(ctx, command, state)
+
+    @untwisted.each
+    def mail():
+      ctx = yield
+
+      class sample(smtp.server.mail):
+        sender = staticmethod(untwisted.each(lambda: (yield equal('test@example.com', str((yield))))))
+
+        @promise.continuate
+        def afterSender(ctx, command, state):
+          equal('RCPT TO:<nottheoilrig>\r\n', str(command))
+
+          ctx.ctx.transport.write(str(smtp.reply(250)))
+
+          #return ...
+          raise StopIteration(ctx.afterRecipient((yield ctx.ctx.command()), ctx.afterRecipient))
+
+        @staticmethod
+        @untwisted.each
+        def content():
+          content = yield
+
+          yield ok(qwer(rfc5321.timeStampLine, rfc5321.timeStampLine, '\r\n'.join(('Date: Fri, 13 Feb 2009 15:31:30 -0800 \(PST\)',
+            'From: notTest@example\.com',
+            'Message-ID: 1234567890@example\.com',
+            '',
+            'Expect'))).match(content), content)
+
+      ctx = yield sample.__get__(ctx)()
+
+      # QUIT
+      yield smtp.server.mail.__get__(ctx)()
+
+  @untwisted.call
+  @promise.continuate
+  def _():
+    while True:
+      ok(False, (yield listen()))
+
+  connect = tcp.connect('localhost', 'smtp')
+
+  #@connect().then
+  @untwisted.identity(connect().then)
+  class client(smtp.client):
+
+    @untwisted.each
+    def mail():
+      ctx = yield
+
+      class sample(smtp.client.mail):
+        sender = iter(('test@example.com',)).next
+        recipient = iter(('test@nottheoilrig.com',)).next
+        content = iter(('\r\n'.join(('Date: Fri, 13 Feb 2009 15:31:30 -0800 (PST)',
+          'From: notTest@example.com',
+          'Message-ID: 1234567890@example.com',
+          '',
+          'Expect')),)).next
+
+      yield sample.__get__(ctx)()
+
+  return server

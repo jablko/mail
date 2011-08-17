@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+import sys, untwisted
+from twisted.internet import reactor
+from twisted.python import log
+from untwisted import promise, smtp, tcp
+
+log.startLogging(sys.stdout)
+
+@untwisted.call
+@promise.continuate
+def _():
+  connect = tcp.connect('localhost', 24)
+
+  class server(smtp.server):
+    class __metaclass__(smtp.server.__metaclass__):
+
+      @promise.continuate
+      def __call__(ctx, transport):
+        ctx = type.__call__(ctx, transport)
+
+        ctx.client = type.__call__(smtp.pipeline, (yield connect()))
+        ctx.client.transport.protocol.connectionLost.then(transport.loseConnection)
+
+        # Greeting
+        transport.write(str((yield ctx.client.reply(untwisted.wildcard))))
+
+        # Proxy all commands
+        #return ...
+        raise StopIteration(ctx.mail())
+
+    class mail(smtp.server.mail):
+
+      @promise.continuate
+      def recipient(ctx, recipient):
+        raise (yield type.__call__(ctx.ctx.client.mail).rcpt('nottheoilrig'))
+
+      @promise.continuate
+      def content(ctx, content):
+
+        # TODO The server returns one reply for each previously successful RCPT
+        # command in the mail transaction, in the order that the RCPT commands
+        # were issued
+        raise (yield (yield type.__call__(ctx.ctx.client.mail).data(content)))
+
+      @promise.continuate
+      def start(ctx, command, state):
+        if 'RCPT' == command.verb:
+          #return ...
+          raise StopIteration(ctx.afterSender(command, state))
+
+        if 'DATA' == command.verb:
+          #return ...
+          raise StopIteration(smtp.server.mail.afterRecipient(ctx, command, state))
+
+        # Proxy all commands
+        ctx.ctx.client.transport.write(str(command))
+
+        reply = yield ctx.ctx.client.reply(untwisted.wildcard)
+
+        ctx.ctx.transport.write(str(reply))
+
+        #return ...
+        raise StopIteration(state((yield ctx.ctx.command()), state))
+
+      afterRecipient = start
+
+  listen = tcp.listen(8716, interface='localhost')
+  while True:
+    server((yield listen()))
+
+reactor.run()
