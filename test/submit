@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+
+from mail.test import *
+from untwisted import smtp, tcp
+
+expect(1)
+
+@sdfg
+@promise.continuate
+def _():
+  connect = tcp.connect('mail.nottheoilrig.com', 'submission')
+
+  client = type.__call__(smtp.client, (yield connect()))
+
+  yield client.reply()
+
+  yield client.ehlo()
+
+  mail = type.__call__(client.mail)
+
+  yield mail.mail('alice@example.com')
+
+  try:
+    ok(False, (yield mail.rcpt('bob@example.com')))
+
+  except smtp.reply:
+    ok(True)
+
+  #return ...
+  raise StopIteration(client.quit())

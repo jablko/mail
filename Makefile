@@ -29,9 +29,6 @@ all:
 
 	${SSH} sudo sed -i '/^mydestination = / d' /etc/postfix/main.cf
 	${SSH} sudo sh -c 'echo "
-smtpd_recipient_restrictions = permit_mynetworks permit_sasl_authenticated reject_unauth_destination
-smtpd_sasl_auth_enable = yes
-
 virtual_mailbox_domains = nottheoilrig.com
 virtual_transport = lmtp:localhost:8716" >> /etc/postfix/main.cf'
 
@@ -40,7 +37,15 @@ s/^smtp      inet  n       -       -/smtp      inet  n       -       n/
 T
 p
 i\
-  -o smtpd_proxy_filter=localhost:1438
+  -o smtpd_proxy_filter=localhost:1438\
+  -o smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated,reject_unauth_destination\
+  -o smtpd_sasl_auth_enable=yes
+s/^smtp/submission/
+p
+i\
+  -o smtpd_proxy_filter=localhost:1438\
+  -o smtpd_recipient_restrictions=permit_sasl_authenticated,reject\
+  -o smtpd_sasl_auth_enable=yes
 g
 s/^smtp/localhost:1894/
 a\
