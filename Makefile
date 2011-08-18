@@ -8,7 +8,7 @@ all:
 
 	HOSTNAME = `ec2-describe-instances ${INSTANCE} | sed s/INSTANCE(?:\s+(\S+)){3}`
 
-	(cd files && find . -type f -exec ${SSH} sudo sh -c 'cat > /{}' < {} \;)
+	(cd files && find . -type f | xargs tar cz) | ${SSH} cd / \&\& sudo tar xz
 
 	${SSH} sed -i 's/[ -z "$PS1" ] && return/&\n\n# An interactive shell without screen\n[ -z "$STY" ] \&\& exec byobu -xRR/' .bashrc
 
