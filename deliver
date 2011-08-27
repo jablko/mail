@@ -8,14 +8,14 @@ from untwisted import promise, smtp, tcp
 log.startLogging(sys.stdout)
 
 @untwisted.call
-@promise.continuate
+@promise.resume
 def _():
   connect = tcp.connect('localhost', 24)
 
   class server(smtp.server):
     class __metaclass__(smtp.server.__metaclass__):
 
-      @promise.continuate
+      @promise.resume
       def __call__(ctx, transport):
         ctx = type.__call__(ctx, transport)
 
@@ -31,11 +31,11 @@ def _():
 
     class mail(smtp.server.mail):
 
-      @promise.continuate
+      @promise.resume
       def recipient(ctx, recipient):
         raise (yield type.__call__(ctx.ctx.client.mail).rcpt('nottheoilrig'))
 
-      @promise.continuate
+      @promise.resume
       def content(ctx, content):
 
         # TODO The server returns one reply for each previously successful RCPT
@@ -43,7 +43,7 @@ def _():
         # were issued
         raise (yield (yield type.__call__(ctx.ctx.client.mail).data(content)))
 
-      @promise.continuate
+      @promise.resume
       def start(ctx, command, state):
         if 'RCPT' == command.verb:
           #return ...

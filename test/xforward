@@ -16,7 +16,7 @@ def _():
 
   #@listen().then
   @untwisted.identity(listen().then)
-  @promise.continuate
+  @promise.resume
   def server(transport):
     transport.write('220\r\n')
 
@@ -50,7 +50,7 @@ def _():
     ok(True, (yield transport.protocol.connectionLost))
 
   @untwisted.call
-  @promise.continuate
+  @promise.resume
   def _():
     while True:
       ok(False, (yield listen()))

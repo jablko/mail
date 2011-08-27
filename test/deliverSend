@@ -16,7 +16,7 @@ def _():
 
   #@listen().then
   @untwisted.identity(listen().then)
-  @promise.continuate
+  @promise.resume
   def server(transport):
     transport.write('220\r\n')
 
@@ -49,7 +49,7 @@ def _():
     transport.write('221\r\n')
 
   @untwisted.call
-  @promise.continuate
+  @promise.resume
   def _():
     while True:
       ok(False, (yield listen()))

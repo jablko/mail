@@ -71,7 +71,7 @@ def _():
             yield smtp.server.mail.__get__(ctx)()
 
         @untwisted.call
-        @promise.continuate
+        @promise.resume
         def _():
           while True:
             ok(False, (yield listen()))

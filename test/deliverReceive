@@ -8,7 +8,7 @@ from untwisted import smtp, tcp
 expect(1)
 
 @sdfg
-@promise.continuate
+@promise.resume
 def _():
   connect = tcp.connect('localhost', 24)
 
