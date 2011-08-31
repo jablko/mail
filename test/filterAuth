@@ -37,7 +37,8 @@ def _():
           stamp = qwer(rfc5321.fromDomain, rfc5321.byDomain, optInfo, '(?:', rfc5322.CFWS, ')?;', rfc5322.FWS, rfc5322.dateTime)
           timeStampLine = qwer('Received:', rfc5322.FWS, stamp, rfc5234.CRLF)
 
-          yield ok(qwer(timeStampLine, '\r\n'.join(('From: notAlice@example\.com',
+          yield ok(qwer(timeStampLine, '\r\n'.join((
+            'From: notAlice@example\.com',
             '',
             'Expect'))).match(content), content)
 
@@ -69,7 +70,8 @@ def _():
       class sample(smtp.client.mail):
         sender = iter(('alice@example.com',)).next
         recipient = iter(('bob@example.com',)).next
-        content = iter(('\r\n'.join(('From: notAlice@example.com',
+        content = iter(('\r\n'.join((
+          'From: notAlice@example.com',
           '',
           'Expect')),)).next
 

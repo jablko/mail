@@ -59,7 +59,8 @@ def _():
                 tagSpec = qwer('(?:', rfc5322.FWS, ')?', tagName, '(?:', rfc5322.FWS, ')?=(?:', rfc5322.FWS, ')?', tagValue, '(?:', rfc5322.FWS, ')?')
                 tagList = qwer(tagSpec, '(?:;', tagSpec, ')*;?')
 
-                yield ok(qwer(rfc5321.timeStampLine, 'DKIM-Signature:', tagList, '\r\n', rfc5321.timeStampLine, '\r\n'.join(('Date: Fri, 13 Feb 2009 15:31:30 -0800 \(PST\)',
+                yield ok(qwer(rfc5321.timeStampLine, 'DKIM-Signature:', tagList, '\r\n', rfc5321.timeStampLine, '\r\n'.join((
+                  'Date: Fri, 13 Feb 2009 15:31:30 -0800 \(PST\)',
                   'From: {}@nottheoilrig\.com'.format(body),
                   'Message-ID: 1234567890@example\.com',
                   '',
@@ -93,7 +94,8 @@ def _():
             class sample(smtp.client.mail):
               sender = iter(('test@example.com',)).next
               recipient = iter(('test@' + domain,)).next
-              content = iter(('\r\n'.join(('Date: Fri, 13 Feb 2009 15:31:30 -0800 (PST)',
+              content = iter(('\r\n'.join((
+                'Date: Fri, 13 Feb 2009 15:31:30 -0800 (PST)',
                 'From: notTest@example.com',
                 'Message-ID: 1234567890@example.com',
                 '',

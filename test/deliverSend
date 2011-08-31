@@ -36,7 +36,8 @@ def _():
 
     transport.write('354\r\n')
 
-    ok(qwer(rfc5321.timeStampLine, rfc5321.timeStampLine, '\r\n'.join(('Date: Fri, 13 Feb 2009 15:31:30 -0800 \(PST\)',
+    ok(qwer(rfc5321.timeStampLine, rfc5321.timeStampLine, '\r\n'.join((
+      'Date: Fri, 13 Feb 2009 15:31:30 -0800 \(PST\)',
       'From: notTest@example\.com',
       'Message-ID: 1234567890@example\.com',
       '',
@@ -67,7 +68,8 @@ def _():
       class sample(smtp.client.mail):
         sender = iter(('test@example.com',)).next
         recipient = iter(('test@nottheoilrig.com',)).next
-        content = iter(('\r\n'.join(('Date: Fri, 13 Feb 2009 15:31:30 -0800 (PST)',
+        content = iter(('\r\n'.join((
+          'Date: Fri, 13 Feb 2009 15:31:30 -0800 (PST)',
           'From: notTest@example.com',
           'Message-ID: 1234567890@example.com',
           '',

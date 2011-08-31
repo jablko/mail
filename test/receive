@@ -25,7 +25,8 @@ def _():
         recipient = iter(('test@nottheoilrig.com',)).next
 
         # DBMail searches header, not envelope sender : P
-        content = iter(('\r\n'.join(('From: notTest@example.com',
+        content = iter(('\r\n'.join((
+          'From: notTest@example.com',
           '',
           'Body')),)).next
 

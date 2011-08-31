@@ -40,7 +40,8 @@ def _():
 
     transport.write('354\r\n')
 
-    ok(qwer(rfc5321.timeStampLine, '\r\n'.join(('From: notAlice@example\.com',
+    ok(qwer(rfc5321.timeStampLine, '\r\n'.join((
+      'From: notAlice@example\.com',
       '',
       'Expect'))).match((yield transport.protocol.dataReceived.shift())))
 
@@ -70,7 +71,8 @@ def _():
       class sample(smtp.client.mail):
         sender = iter(('alice@example.com',)).next
         recipient = iter(('bob@example.com',)).next
-        content = iter(('\r\n'.join(('From: notAlice@example.com',
+        content = iter(('\r\n'.join((
+          'From: notAlice@example.com',
           '',
           'Expect')),)).next
 
