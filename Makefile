@@ -21,6 +21,7 @@ all:
 	  opendkim \
 	  postfix \
 	  python-mysqldb \
+	  python-gnutls \
 	  python-twisted
 
 	${SSH} mysql -u root -e 'grant all on dbmail.* to dbmail@localhost'
@@ -69,4 +70,6 @@ test:
 
 	HOSTNAME = `ec2-describe-instances ${INSTANCE} | sed s/INSTANCE(?:\s+(\S+)){3}`
 
-	${SSH} sudo aptitude -DR install python-twisted
+	${SSH} sudo aptitude -DR install \
+	  python-gnutls \
+	  python-twisted
