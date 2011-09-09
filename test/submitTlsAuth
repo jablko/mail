@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+
+import base64, socket
+from mail.test import *
+from mail.test import tls
+from qwer import *
+from twisted.internet import protocol
+from twisted.web import http
+from untwisted import rfc5234, rfc5321, rfc5322, smtp, tcp
+
+expect(3)
+
+# Cache our domain
+domain = socket.getfqdn()
+
+@sdfg
+def _():
+
+  @untwisted.call
+  class factory(protocol.ClientFactory):
+    class protocol(http.HTTPClient):
+      def connectionMade(ctx):
+        ctx.sendCommand('GET', '/test@' + domain)
+
+        ctx.sendHeader('Authorization', 'Basic ' + base64.b64encode(username + ':' + password))
+
+        ctx.endHeaders()
+
+      def handleResponse(ctx, body):
+        listen = tcp.listen('smtp')
+
+        #@listen().then
+        @untwisted.identity(listen().then)
+        class server(smtp.server):
+
+          @untwisted.each
+          def mail():
+            ctx = yield
+
+            class sample(smtp.server.mail):
+              sender = staticmethod(untwisted.each(lambda: (yield equal(body + '@nottheoilrig.com', str((yield))))))
+              recipient = staticmethod(untwisted.each(lambda: (yield equal('test@' + domain, str((yield))))))
+
+              @staticmethod
+              @untwisted.each
+              def content():
+                content = yield
+
+                ALNUMPUNC = qwer('(?:', rfc5234.ALPHA, '|', rfc5234.DIGIT, '|_)')
+                tagName = qwer(rfc5234.ALPHA, '(?:', ALNUMPUNC, ')*')
+
+                # EXCLAMATION to TILDE except SEMICOLON
+                VALCHAR = qwer('[!-:<-~]')
+
+                tval = qwer('(?:', VALCHAR, ')+')
+
+                # WSP and FWS prohibited at beginning and end
+                tagValue = qwer('(?:', tval, '(?:(?:', rfc5234.WSP, '|', rfc5322.FWS, ')+', tval, ')*)?')
+
+                tagSpec = qwer('(?:', rfc5322.FWS, ')?', tagName, '(?:', rfc5322.FWS, ')?=(?:', rfc5322.FWS, ')?', tagValue, '(?:', rfc5322.FWS, ')?')
+                tagList = qwer(tagSpec, '(?:;', tagSpec, ')*;?')
+
+                yield ok(qwer(rfc5321.timeStampLine, 'DKIM-Signature:', tagList, '\r\n', rfc5321.timeStampLine, '\r\n'.join((
+                  'Date: Fri, 13 Feb 2009 15:31:30 -0800 \(PST\)',
+                  'From: {}@nottheoilrig\.com'.format(body),
+                  'Message-ID: 1234567890@example\.com',
+                  '',
+                  'Expect'))).match(content), content)
+
+            ctx = yield sample.__get__(ctx)()
+
+            # QUIT
+            yield smtp.server.mail.__get__(ctx)()
+
+        @untwisted.call
+        @promise.resume
+        def _():
+          while True:
+            ok(False, (yield listen()))
+
+        connect = tcp.connect('mail.nottheoilrig.com', 'submission')
+
+        #@connect().then
+        @untwisted.identity(connect().then)
+        class client(smtp.client):
+
+          @untwisted.each
+          def mail():
+            ctx = yield
+
+            ctx.transport.write(str(smtp.command('STARTTLS')))
+
+            yield ctx.reply()
+
+            yield tls.startTls(ctx.transport)
+
+            ctx.transport.write(str(smtp.command('AUTH PLAIN', base64.b64encode('\0' + username + '\0' + password))))
+
+            ctx.reply()
+
+            class sample(smtp.client.mail):
+              sender = iter(('test@example.com',)).next
+              recipient = iter(('test@' + domain,)).next
+              content = iter(('\r\n'.join((
+                'Date: Fri, 13 Feb 2009 15:31:30 -0800 (PST)',
+                'From: notTest@example.com',
+                'Message-ID: 1234567890@example.com',
+                '',
+                'Expect')),)).next
+
+            yield sample.__get__(ctx)()
+
+  reactor.connectTCP('mail.nottheoilrig.com', 'http', factory)
+
+  return promise.promise()
