@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+
+from mail.test import *
+from untwisted import dns
+
+expect(2)
+
+@sdfg
+@promise.resume
+def _():
+  answer = (yield dns.lookup('nottheoilrig.com', dns.NS)).answer
+
+  expect(2 * len(answer))
+
+  for answer in answer:
+    response = yield dns.lookup('nottheoilrig.com', dns.MX, server=answer.nsdname)
+
+    ok(response.header.aa)
+
+    for answer in response.answer:
+      equal('mail.nottheoilrig.com.', answer.exchange)
