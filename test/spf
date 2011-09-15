@@ -15,7 +15,7 @@ def _():
   for answer in answer:
     response = yield dns.lookup('nottheoilrig.com', dns.TXT, server=answer.nsdname)
 
-    ok(response.header.aa)
+    ok(response.aa)
 
     for answer in response.answer:
       equal('v=spf1 a:mail.nottheoilrig.com', answer.txtData)

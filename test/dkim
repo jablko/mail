@@ -15,7 +15,7 @@ def _():
   for answer in answer:
     response = yield dns.lookup('mail._domainkey.nottheoilrig.com', dns.TXT, server=answer.nsdname)
 
-    ok(response.header.aa)
+    ok(response.aa)
 
     for answer in response.answer:
       equal('p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDhjqHp2tFeRkqBmNlLbh9xEafuesviNQfwydLLvx8+UeQlpM+o2uHOO1h6JILwqS1vO7pN4igPxjaVdidS8i08hpiBiga2OzwwBj7nscyODu60IzBgd7IItGcB3vGrHgqJAqr4UNXsyJHkB29hKpEN5x9wgIYoAbNemUhKHBiYXQIDAQAB', answer.txtData)
