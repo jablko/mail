@@ -20,7 +20,7 @@ def _():
         ctx = type.__call__(ctx, transport)
 
         ctx.client = type.__call__(smtp.pipeline, (yield connect()))
-        ctx.client.transport.protocol.connectionLost.then(transport.loseConnection)
+        ctx.client.transport.protocol.connectionLost.then(transport.close)
 
         # Greeting
         transport.write(str((yield ctx.client.reply(untwisted.wildcard))))
