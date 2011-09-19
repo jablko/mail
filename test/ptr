@@ -15,14 +15,6 @@ def _():
   #@listen().then
   @untwisted.identity(listen().then)
   def server(transport):
-    qname, _ = transport.client
-
-    qname = qname.split('.')
-    qname.reverse()
-    qname = '.'.join(qname) + '.in-addr.arpa'
-
-    dns.lookup(qname, dns.PTR).then(lambda actual: equal('mail.nottheoilrig.com.', actual.answer.ptrdname))
-
     class server(smtp.server):
 
       @untwisted.each
@@ -44,7 +36,13 @@ def _():
         # QUIT
         yield smtp.server.mail.__get__(ctx)()
 
-    return server(transport)
+    qname, _ = transport.client
+
+    qname = qname.split('.')
+    qname.reverse()
+    qname = '.'.join(qname) + '.in-addr.arpa'
+
+    return promise.join(server(transport), dns.lookup(qname, dns.PTR).then(lambda actual: equal('mail.nottheoilrig.com.', actual.answer.ptrdname)))
 
   @untwisted.call
   @promise.resume
