@@ -28,7 +28,8 @@ all:
 	${SSH} mysql -u root -e 'create database dbmail character set utf8'
 	${SSH} zcat /usr/share/doc/dbmail-mysql/examples/create_tables.mysql.gz \| mysql -u dbmail dbmail
 
-	${SSH} sudo sed -i '/^mydestination = / d' /etc/postfix/main.cf
+	${SSH} sudo sed -i '/^mydestination = / d
+s/^myhostname = .*/myhostname = mail.nottheoilrig.com' /etc/postfix/main.cf
 	${SSH} sudo sh -c 'echo "
 virtual_mailbox_domains = nottheoilrig.com
 virtual_transport = lmtp:localhost:8716" >> /etc/postfix/main.cf'

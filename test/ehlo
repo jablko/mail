@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+
+import base64, socket
+from mail.test import *
+from untwisted import smtp, tcp
+
+expect(1)
+
+# Cache our domain
+domain = socket.getfqdn()
+
+@sdfg
+def _():
+  listen = tcp.listen('smtp')
+
+  #@listen().then
+  @untwisted.identity(listen().then)
+  def server(transport):
+    class server(smtp.server):
+      class __metaclass__(smtp.server.__metaclass__):
+
+        @promise.resume
+        def __call__(ctx, transport):
+          ctx = type.__call__(ctx, transport)
+
+          ctx.greeting()
+
+          command = yield ctx.command()
+
+          equal('EHLO mail.nottheoilrig.com\r\n', str(command))
+
+          raise StopIteration(ctx.start(command, ctx.start))
+
+      @untwisted.each
+      def mail():
+        ctx = yield
+
+        class sample(smtp.server.mail):
+          def sender(ctx, sender):
+            pass
+
+          def recipient(ctx, sender):
+            pass
+
+          def content(ctx, content):
+            pass
+
+        ctx = yield sample.__get__(ctx)()
+
+        # QUIT
+        yield smtp.server.mail.__get__(ctx)()
+
+    return server(transport)
+
+  @untwisted.call
+  @promise.resume
+  def _():
+    while True:
+      ok(False, (yield listen()))
+
+  connect = tcp.connect('mail.nottheoilrig.com', 'smtp')
+
+  #@connect().then
+  @untwisted.identity(connect().then)
+  class client(smtp.client):
+
+    @untwisted.each
+    def mail():
+      ctx = yield
+
+      ctx.transport.write(str(smtp.command('AUTH PLAIN', base64.b64encode('\0' + username + '\0' + password))))
+
+      ctx.reply()
+
+      class sample(smtp.client.mail):
+        sender = iter(('test@example.com',)).next
+        recipient = iter(('test@' + domain,)).next
+        content = iter(('Expect',)).next
+
+      yield sample.__get__(ctx)()
+
+  return server
