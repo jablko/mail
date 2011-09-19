@@ -2,11 +2,11 @@
 
 import base64, socket
 from mail.test import *
-from mail.test import tls
+from mail.test import rfc4871, tls
 from qwer import *
 from twisted.internet import protocol
 from twisted.web import http
-from untwisted import rfc5234, rfc5321, rfc5322, smtp, tcp
+from untwisted import rfc5321, smtp, tcp
 
 expect(3)
 
@@ -46,21 +46,7 @@ def _():
               def content():
                 content = yield
 
-                ALNUMPUNC = qwer('(?:', rfc5234.ALPHA, '|', rfc5234.DIGIT, '|_)')
-                tagName = qwer(rfc5234.ALPHA, '(?:', ALNUMPUNC, ')*')
-
-                # EXCLAMATION to TILDE except SEMICOLON
-                VALCHAR = qwer('[!-:<-~]')
-
-                tval = qwer('(?:', VALCHAR, ')+')
-
-                # WSP and FWS prohibited at beginning and end
-                tagValue = qwer('(?:', tval, '(?:(?:', rfc5234.WSP, '|', rfc5322.FWS, ')+', tval, ')*)?')
-
-                tagSpec = qwer('(?:', rfc5322.FWS, ')?', tagName, '(?:', rfc5322.FWS, ')?=(?:', rfc5322.FWS, ')?', tagValue, '(?:', rfc5322.FWS, ')?')
-                tagList = qwer(tagSpec, '(?:;', tagSpec, ')*;?')
-
-                yield ok(qwer(rfc5321.timeStampLine, 'DKIM-Signature:', tagList, '\r\n', rfc5321.timeStampLine, '\r\n'.join((
+                yield ok(qwer(rfc5321.timeStampLine, 'DKIM-Signature:', rfc4871.tagList, '\r\n', rfc5321.timeStampLine, '\r\n'.join((
                   'Date: Fri, 13 Feb 2009 15:31:30 -0800 \(PST\)',
                   'From: {}@nottheoilrig\.com'.format(body),
                   'Message-ID: 1234567890@example\.com',
