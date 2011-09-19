@@ -10,5 +10,5 @@ def sdfg(cbl):
   # Test complete whether success or exception
   cbl().then(promise.promise()).then(lambda _: reactor.stop())
 
-  reactor.callLater(2, reactor.stop)
+  reactor.callLater(3, reactor.stop)
   reactor.run()
