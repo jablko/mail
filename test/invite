@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+from mail.test import *
+from untwisted import sip
+
+expect(1)
+
+sdfg(lambda: sip.client('INVITE', 'sip:mail.nottheoilrig.com', '"Jack Bates" <sip:jack@nottheoilrig.com>').then(untwisted.partial(ok, True)))
