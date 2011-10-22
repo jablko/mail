@@ -12,7 +12,7 @@ response = stun.request('stun.telepathy.im')
 def _():
   listen = tcp.listen('smtp')
 
-  #@listen().then
+  #@...
   @untwisted.identity(listen().then)
   def server(transport):
     class server(smtp.server):
@@ -52,7 +52,7 @@ def _():
 
   connect = tcp.connect('mail.nottheoilrig.com', 'smtp')
 
-  #@connect().then
+  #@...
   @untwisted.identity(connect().then)
   class client(smtp.client):
 

@@ -10,7 +10,7 @@ expect(3)
 def _():
   listen = tcp.listen(1438)
 
-  #@listen().then
+  #@...
   @untwisted.identity(listen().then)
   class server(smtp.server):
 
@@ -53,7 +53,7 @@ def _():
 
   connect = tcp.connect('localhost', 'smtp')
 
-  #@connect().then
+  #@...
   @untwisted.identity(connect().then)
   class client(smtp.client):
 

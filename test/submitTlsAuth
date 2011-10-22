@@ -29,7 +29,7 @@ def _():
       def handleResponse(ctx, body):
         listen = tcp.listen('smtp')
 
-        #@listen().then
+        #@...
         @untwisted.identity(listen().then)
         class server(smtp.server):
 
@@ -66,7 +66,7 @@ def _():
 
         connect = tcp.connect('mail.nottheoilrig.com', 'submission')
 
-        #@connect().then
+        #@...
         @untwisted.identity(connect().then)
         class client(smtp.client):
 

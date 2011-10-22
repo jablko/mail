@@ -14,7 +14,7 @@ domain = socket.getfqdn()
 def _():
   listen = tcp.listen(24)
 
-  #@listen().then
+  #@...
   @untwisted.identity(listen().then)
   @promise.resume
   def server(transport):
@@ -57,7 +57,7 @@ def _():
 
   connect = tcp.connect('localhost', 'smtp')
 
-  #@connect().then
+  #@...
   @untwisted.identity(connect().then)
   class client(smtp.client):
 
