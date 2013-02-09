@@ -1,4 +1,4 @@
-SSH=ssh -i $(KEYPAIR) ubuntu@$(HOSTNAME)
+SSH=ssh -i $(KEYPAIR) -t ubuntu@$(HOSTNAME)
 
 all:
 	# us-east-1 64-bit ebs
@@ -10,7 +10,9 @@ all:
 
 	(cd files && find . -type f | xargs tar c) | $(SSH) cd / \&\& sudo tar x
 
-	$(SSH) $(MAKE)
+	$(SSH) byobu new-session \' \
+	  $(MAKE)\; \
+	  bash\'
 
 test:
 	# us-east-1 64-bit ebs
@@ -18,6 +20,8 @@ test:
 
 	HOSTNAME = `ec2-describe-instances $(INSTANCE) | sed s/INSTANCE(?:\s+(\S+)){3}`
 
-	$(SSH) sudo aptitude -DRy install \
-	  python-gnutls \
-	  python-twisted
+	$(SSH) byobu new-session \' \
+	  sudo aptitude -DRy install \
+	    python-gnutls \
+	    python-twisted\; \
+	  bash\'
