@@ -10,7 +10,7 @@ all:
 
 	(cd files && find . -type f | xargs tar cz) | $(SSH) cd / \&\& sudo tar xz
 
-	$(SSH) sudo aptitude -DR install \
+	$(SSH) sudo aptitude -DRy install \
 	  apache2 \
 	  dbmail-mysql \
 	  libaprutil1-dbd-mysql \
@@ -69,6 +69,6 @@ test:
 
 	HOSTNAME = `ec2-describe-instances $(INSTANCE) | sed s/INSTANCE(?:\s+(\S+)){3}`
 
-	$(SSH) sudo aptitude -DR install \
+	$(SSH) sudo aptitude -DRy install \
 	  python-gnutls \
 	  python-twisted
