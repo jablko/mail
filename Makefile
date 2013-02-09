@@ -8,7 +8,7 @@ all:
 
 	HOSTNAME = `ec2-describe-instances $(INSTANCE) | sed s/INSTANCE(?:\s+(\S+)){3}`
 
-	(cd files && find . -type f | xargs tar cz) | $(SSH) cd / \&\& sudo tar xz
+	(cd files && find . -type f | xargs tar c) | $(SSH) cd / \&\& sudo tar x
 
 	$(SSH) sudo aptitude -DRy install \
 	  apache2 \
