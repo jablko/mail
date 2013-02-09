@@ -1,16 +1,16 @@
-SSH=ssh -i ${KEYPAIR} ubuntu@${HOSTNAME}
+SSH=ssh -i $(KEYPAIR) ubuntu@$(HOSTNAME)
 
 all:
 	# us-east-1 64-bit ebs
 	INSTANCE = `ec2-run-instances ami-1aad5273 -k ec2-keypair -t t1.micro | sed s/INSTANCE\s+(\S+)`
 
-	ec2-associate-address 50.16.249.74 -i ${INSTANCE}
+	ec2-associate-address 50.16.249.74 -i $(INSTANCE)
 
-	HOSTNAME = `ec2-describe-instances ${INSTANCE} | sed s/INSTANCE(?:\s+(\S+)){3}`
+	HOSTNAME = `ec2-describe-instances $(INSTANCE) | sed s/INSTANCE(?:\s+(\S+)){3}`
 
-	(cd files && find . -type f | xargs tar cz) | ${SSH} cd / \&\& sudo tar xz
+	(cd files && find . -type f | xargs tar cz) | $(SSH) cd / \&\& sudo tar xz
 
-	${SSH} sudo aptitude -DR install \
+	$(SSH) sudo aptitude -DR install \
 	  apache2 \
 	  dbmail-mysql \
 	  libaprutil1-dbd-mysql \
@@ -22,17 +22,17 @@ all:
 	  python-gnutls \
 	  python-twisted
 
-	${SSH} mysql -u root -e 'grant all on dbmail.* to dbmail@localhost'
-	${SSH} mysql -u root -e 'create database dbmail character set utf8'
-	${SSH} zcat /usr/share/doc/dbmail-mysql/examples/create_tables.mysql.gz \| mysql -u dbmail dbmail
+	$(SSH) mysql -u root -e 'grant all on dbmail.* to dbmail@localhost'
+	$(SSH) mysql -u root -e 'create database dbmail character set utf8'
+	$(SSH) zcat /usr/share/doc/dbmail-mysql/examples/create_tables.mysql.gz \| mysql -u dbmail dbmail
 
-	${SSH} sudo sed -i '/^mydestination = / d
+	$(SSH) sudo sed -i '/^mydestination = / d
 s/^myhostname = .*/myhostname = mail.nottheoilrig.com' /etc/postfix/main.cf
-	${SSH} sudo sh -c 'echo "
+	$(SSH) sudo sh -c 'echo "
 virtual_mailbox_domains = nottheoilrig.com
 virtual_transport = lmtp:localhost:8716" >> /etc/postfix/main.cf'
 
-	${SSH} sudo sed -i 'h
+	$(SSH) sudo sed -i 'h
 s/^smtp      inet  n       -       -/smtp      inet  n       -       n/
 T
 p
@@ -51,24 +51,24 @@ s/^smtp/localhost:1894/
 a\
   -o smtpd_authorized_xforward_hosts=localhost\
   -o smtpd_milters=inet:localhost:8891' /etc/postfix/master.cf
-	${SSH} sudo sed -i '/^lmtp/ a\
+	$(SSH) sudo sed -i '/^lmtp/ a\
   -o disable_dns_lookups=yes' /etc/postfix/master.cf
 
-	${SSH} sudo sh -c 'echo "
+	$(SSH) sudo sh -c 'echo "
 Domain nottheoilrig.com
 KeyFile /home/ubuntu/default.private
 Selector mail" >> /etc/opendkim.conf'
 
-	${SSH} sudo a2enmod authn_dbd proxy_http
+	$(SSH) sudo a2enmod authn_dbd proxy_http
 
-	${SSH} sudo sed -i 's/^<\/VirtualHost>/  DBDriver mysql\n  DBDParams dbname=dbmail,user=dbmail\n\n  <Location \/>\n\n    AuthType Basic\n    AuthName nottheoilrig\n    AuthBasicProvider dbd\n\n    # http:\/\/jdbates.blogspot.com\/2011\/01\/recently-required-little-research-to.html\n    AuthDBDUserPWQuery "SELECT ENCRYPT(passwd) FROM dbmail_users WHERE userid = %s"\n    Require valid-user\n\n    ProxyPass http:\/\/localhost:8743\/\n\n  <\/Location>\n\n<\/VirtualHost>/' /etc/apache2/sites-available/default
+	$(SSH) sudo sed -i 's/^<\/VirtualHost>/  DBDriver mysql\n  DBDParams dbname=dbmail,user=dbmail\n\n  <Location \/>\n\n    AuthType Basic\n    AuthName nottheoilrig\n    AuthBasicProvider dbd\n\n    # http:\/\/jdbates.blogspot.com\/2011\/01\/recently-required-little-research-to.html\n    AuthDBDUserPWQuery "SELECT ENCRYPT(passwd) FROM dbmail_users WHERE userid = %s"\n    Require valid-user\n\n    ProxyPass http:\/\/localhost:8743\/\n\n  <\/Location>\n\n<\/VirtualHost>/' /etc/apache2/sites-available/default
 
 test:
 	# us-east-1 64-bit ebs
 	INSTANCE = `ec2-run-instances ami-1aad5273 -k ec2-keypair -t t1.micro | sed s/INSTANCE\s+(\S+)`
 
-	HOSTNAME = `ec2-describe-instances ${INSTANCE} | sed s/INSTANCE(?:\s+(\S+)){3}`
+	HOSTNAME = `ec2-describe-instances $(INSTANCE) | sed s/INSTANCE(?:\s+(\S+)){3}`
 
-	${SSH} sudo aptitude -DR install \
+	$(SSH) sudo aptitude -DR install \
 	  python-gnutls \
 	  python-twisted
