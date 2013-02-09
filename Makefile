@@ -10,8 +10,6 @@ all:
 
 	(cd files && find . -type f | xargs tar cz) | ${SSH} cd / \&\& sudo tar xz
 
-	${SSH} sed -i 's/[ -z "$PS1" ] && return/&\n\n# An interactive shell without screen\n[ -z "$STY" ] \&\& exec byobu -xRR/' .bashrc
-
 	${SSH} sudo aptitude -DR install \
 	  apache2 \
 	  dbmail-mysql \
