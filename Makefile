@@ -28,9 +28,9 @@ all:
 
 	$(SSH) sudo sed -i '/^mydestination = / d
 s/^myhostname = .*/myhostname = mail.nottheoilrig.com' /etc/postfix/main.cf
-	$(SSH) sudo sh -c 'echo "
+	echo '
 virtual_mailbox_domains = nottheoilrig.com
-virtual_transport = lmtp:localhost:8716" >> /etc/postfix/main.cf'
+virtual_transport = lmtp:localhost:8716' | $(SSH) sudo sh -c 'cat >> /etc/postfix/main.cf'
 
 	$(SSH) sudo sed -i 'h
 s/^smtp      inet  n       -       -/smtp      inet  n       -       n/
@@ -54,10 +54,10 @@ a\
 	$(SSH) sudo sed -i '/^lmtp/ a\
   -o disable_dns_lookups=yes' /etc/postfix/master.cf
 
-	$(SSH) sudo sh -c 'echo "
+	echo '
 Domain nottheoilrig.com
 KeyFile /home/ubuntu/default.private
-Selector mail" >> /etc/opendkim.conf'
+Selector mail' | $(SSH) sudo sh -c 'cat >> /etc/opendkim.conf'
 
 	$(SSH) sudo a2enmod authn_dbd proxy_http
 
