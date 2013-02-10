@@ -1,8 +1,9 @@
-SSH=ssh -i $(KEYPAIR) -t ubuntu@$(HOSTNAME)
+KEYPAIR=keypair
+SSH=ssh -t ubuntu@$(HOSTNAME)
 
 all:
 	# us-east-1 64-bit ebs
-	$(eval INSTANCE=$(shell ec2-run-instances ami-1aad5273 -k ec2-keypair -t t1.micro | sed -n 's/INSTANCE\s+\(\S+\)/\1/p'))
+	$(eval INSTANCE=$(shell ec2-run-instances ami-1aad5273 -k $(KEYPAIR) -t t1.micro | sed -n 's/INSTANCE\s+\(\S+\)/\1/p'))
 
 	$(eval HOSTNAME=$(shell ec2-describe-instances $(INSTANCE) | sed -n 's/INSTANCE(?:\s+\(\S+\)){3}/\1/p'))
 
@@ -14,7 +15,7 @@ all:
 
 test:
 	# us-east-1 64-bit ebs
-	$(eval INSTANCE=$(shell ec2-run-instances ami-1aad5273 -k ec2-keypair -t t1.micro | sed -n 's/INSTANCE\s+\(\S+\)/\1/p'))
+	$(eval INSTANCE=$(shell ec2-run-instances ami-1aad5273 -k $(KEYPAIR) -t t1.micro | sed -n 's/INSTANCE\s+\(\S+\)/\1/p'))
 
 	$(eval HOSTNAME=$(shell ec2-describe-instances $(INSTANCE) | sed -n 's/INSTANCE(?:\s+\(\S+\)){3}/\1/p'))
 
