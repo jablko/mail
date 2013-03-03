@@ -1,5 +1,5 @@
 KEYPAIR=keypair
-SSH=ssh -t ubuntu@$(HOSTNAME)
+SSH=ssh -o StrictHostKeyChecking=no -t ubuntu@$(HOSTNAME)
 
 all:
 	$(eval AMI=$(shell curl http://cloud-images.ubuntu.com/query/quantal/server/daily.current.txt | awk '$$5 == "ebs" && $$6 == "amd64" && $$7 == "us-east-1" && $$9 != "hvm" { print $$8 }'))
