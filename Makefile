@@ -13,6 +13,18 @@ all:
 	done
 
 	$(SSH) byobu new-session \' \
+	  sudo aptitude -DRy install \
+	    build-essential \
+	    apache2 \
+	    dbmail-mysql \
+	    libaprutil1-dbd-mysql \
+	    libsasl2-modules-sql \
+	    mysql-server \
+	    opendkim \
+	    postfix \
+	    python-mysqldb \
+	    python-gnutls \
+	    python-twisted \&\& \
 	  $(MAKE)\; \
 	  bash\'
 

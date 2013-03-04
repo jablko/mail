@@ -1,16 +1,4 @@
 all:
-	sudo aptitude -DRy install \
-	  apache2 \
-	  dbmail-mysql \
-	  libaprutil1-dbd-mysql \
-	  libsasl2-modules-sql \
-	  mysql-server \
-	  opendkim \
-	  postfix \
-	  python-mysqldb \
-	  python-gnutls \
-	  python-twisted
-
 	mysql -u root -e 'grant all on dbmail.* to dbmail@localhost'
 	mysql -u root -e 'create database dbmail character set utf8'
 	zcat /usr/share/doc/dbmail-mysql/examples/create_tables.mysql.gz | mysql -u dbmail dbmail
