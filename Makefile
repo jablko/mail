@@ -9,7 +9,7 @@ all:
 	$(eval HOSTNAME=$(shell ec2-describe-instances $(INSTANCE) | awk '/^INSTANCE/ { print $$4 }'))
 
 	TIMEOUT=$$(expr $$(date +%s) + 5) && while [ $$(date +%s) -lt $$TIMEOUT ]; do \
-	  (cd files && find . -type f | xargs tar c) | $(SSH) cd / \&\& sudo tar x && exit $$?; \
+	  (cd files && find . -type f | xargs tar c) | $(SSH) cd / \&\& sudo tar x && break; \
 	done
 
 	$(SSH) byobu new-session \' \
