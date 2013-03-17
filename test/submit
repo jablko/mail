@@ -8,7 +8,13 @@ expect(1)
 @sdfg
 @promise.resume
 def _():
-  connect = tcp.connect('mail.nottheoilrig.com', 'submission')
+  try:
+    _, host = sys.argv
+
+  except ValueError:
+    host = 'mail.nottheoilrig.com'
+
+  connect = tcp.connect(host, 'submission')
 
   client = type.__call__(smtp.client, (yield connect()))
 
