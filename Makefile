@@ -14,11 +14,11 @@ all:
 
 	$(SSH) byobu new-session \' \
 	  sudo aptitude -DRy install \
-	    build-essential \
 	    apache2 \
 	    dbmail-mysql \
 	    libaprutil1-dbd-mysql \
 	    libsasl2-modules-sql \
+	    make \
 	    mysql-server \
 	    opendkim \
 	    postfix \
