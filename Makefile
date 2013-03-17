@@ -13,7 +13,7 @@ all:
 	done
 
 	$(SSH) byobu new-session \' \
-	  sudo aptitude -DRy install \
+	  sudo DEBIAN_PRIORITY=critical aptitude -DRy install \
 	    apache2 \
 	    dbmail-mysql \
 	    libaprutil1-dbd-mysql \
