@@ -23,7 +23,6 @@ all:
 	    opendkim \
 	    postfix \
 	    python-mysqldb \
-	    python-gnutls \
 	    python-twisted \&\& \
 	  $(MAKE)\; \
 	  bash\'
