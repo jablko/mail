@@ -28,6 +28,9 @@ all:
 	  bash\'
 
 test:
+	testify test/send test/sendTls test/submit test/submitTls
+
+test/relay:
 	$(eval AMI=$(shell curl http://cloud-images.ubuntu.com/query/quantal/server/daily.current.txt | awk '$$5 == "ebs" && $$6 == "amd64" && $$7 == "us-east-1" && $$9 != "hvm" { print $$8 }'))
 
 	$(eval INSTANCE=$(shell ec2-run-instances -k $(KEYPAIR) -t t1.micro $(AMI) | awk '/^INSTANCE/ { print $$2 }'))
@@ -39,3 +42,5 @@ test:
 	    python-gnutls \
 	    python-twisted\; \
 	  bash\'
+
+.PHONY: test

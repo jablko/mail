@@ -12,3 +12,4 @@ def sdfg(callback):
 
   reactor.callLater(3, reactor.stop)
   reactor.run()
+  reactor.__init__()
