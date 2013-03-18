@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from mail.test import *
 from untwisted import smtp, tcp
 
@@ -8,11 +9,7 @@ expect(1)
 @sdfg
 @promise.resume
 def _():
-  try:
-    _, host = sys.argv
-
-  except ValueError:
-    host = 'mail.nottheoilrig.com'
+  host = os.environ.get('HOST', 'mail.nottheoilrig.com')
 
   connect = tcp.connect(host, 'smtp')
 
