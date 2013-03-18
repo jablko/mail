@@ -30,6 +30,9 @@ all:
 test:
 	testify test/send test/sendTls test/submit test/submitTls
 
+test/dns:
+	testify test/dkim test/mx test/spf test/srv
+
 test/relay:
 	$(eval AMI=$(shell curl http://cloud-images.ubuntu.com/query/quantal/server/daily.current.txt | awk '$$5 == "ebs" && $$6 == "amd64" && $$7 == "us-east-1" && $$9 != "hvm" { print $$8 }'))
 
