@@ -41,8 +41,9 @@ Selector mail" | sudo sh -c 'cat >> /etc/opendkim.conf'
 
 	sudo a2enmod authn_dbd proxy_http
 
-	sudo sed -i '
-	  s/^<\/VirtualHost>/  DBDriver mysql\
+	sudo sed -i '# \
+	  s/^<\/VirtualHost>/\
+  DBDriver mysql\
   DBDParams dbname=dbmail,user=dbmail\
 \
   <Location \/>\
@@ -60,3 +61,5 @@ Selector mail" | sudo sh -c 'cat >> /etc/opendkim.conf'
   <\/Location>\
 \
 <\/VirtualHost>/' /etc/apache2/sites-available/default
+
+	sudo apache2ctl restart
