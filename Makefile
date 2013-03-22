@@ -1,18 +1,16 @@
 KEYPAIR=keypair
 SSH=ssh -o StrictHostKeyChecking=no -t ubuntu@$(HOSTNAME)
 
-all:
-	$(eval AMI=$(shell curl http://cloud-images.ubuntu.com/query/quantal/server/daily.current.txt | awk '$$5 == "ebs" && $$6 == "amd64" && $$7 == "us-east-1" && $$9 != "hvm" { print $$8 }'))
+define retry
+  TIMEOUT=$$(date -d 81sec +%s) && while [ $$(date +%s) -lt $$TIMEOUT ]; do \
+    $1 && break; \
+  done
+endef
 
-	$(eval INSTANCE=$(shell ec2-run-instances -k $(KEYPAIR) -t t1.micro $(AMI) | awk '/^INSTANCE/ { print $$2 }'))
+all: aws
+	$(call retry,(cd files && find . -type f | xargs tar c) | $(SSH) cd / \&\& sudo tar x)
 
-	$(eval HOSTNAME=$(shell ec2-describe-instances $(INSTANCE) | awk '/^INSTANCE/ { print $$4 }'))
-
-	TIMEOUT=$$(date -d 27sec +%s) && while [ $$(date +%s) -lt $$TIMEOUT ]; do \
-	  (cd files && find . -type f | xargs tar c) | $(SSH) cd / \&\& sudo tar x && break; \
-	done
-
-	$(SSH) byobu new-session \' \
+	$(SSH) byobu new-session '" \
 	  sudo DEBIAN_FRONTEND=noninteractive aptitude -DRy install \
 	    apache2 \
 	    dbmail-mysql \
@@ -23,27 +21,55 @@ all:
 	    opendkim \
 	    postfix \
 	    python-mysqldb \
-	    python-twisted \&\& \
-	  $(MAKE)\; \
-	  bash\'
+	    python-twisted && \
+	  $(MAKE); \
+	  bash"'
 
-test:
-	testify test/send test/sendTls test/submit test/submitTls
-
-test/dns:
-	testify test/dkim test/mx test/spf test/srv
-
-test/relay:
+aws:
+	# Get latest Ubuntu AMI
 	$(eval AMI=$(shell curl http://cloud-images.ubuntu.com/query/quantal/server/daily.current.txt | awk '$$5 == "ebs" && $$6 == "amd64" && $$7 == "us-east-1" && $$9 != "hvm" { print $$8 }'))
 
+	# Run it
 	$(eval INSTANCE=$(shell ec2-run-instances -k $(KEYPAIR) -t t1.micro $(AMI) | awk '/^INSTANCE/ { print $$2 }'))
 
+	# Get hostname
 	$(eval HOSTNAME=$(shell ec2-describe-instances $(INSTANCE) | awk '/^INSTANCE/ { print $$4 }'))
 
-	$(SSH) byobu new-session \' \
+test:
+	testify \
+	  test/send \
+	  test/sendTls \
+	  test/submit \
+	  test/submitTls
+
+test/dns:
+	testify \
+	  test/dkim \
+	  test/mx \
+	  test/spf \
+	  test/srv
+
+test/relay: aws
+	$(call retry,(cd .. && find mail untwisted -name \*.py | xargs tar c \
+	  mail/test/sendAuth \
+	  mail/test/sendTlsAuth \
+	  mail/test/submitAuth \
+	  mail/test/submitTlsAuth \
+	  qwer/__init__.py \
+	  testify/__init__.py \
+	  testify/testify) | $(SSH) tar x)
+
+	$(SSH) byobu new-session \'' \
 	  sudo aptitude -DRy install \
 	    python-gnutls \
-	    python-twisted\; \
-	  bash\'
+	    python-twisted && \
+	  sudo sed -i '\'\\\'\''/gcry_control(GCRYCTL_SET_THREAD_CBS,/ a \
+    libgnutls.gcry_check_version('\'\\\'\\\\\\\'1.2.4\\\\\\\'\\\'\'') # GNUTLS_MIN_LIBGCRYPT_VERSION'\'\\\'\'' /usr/lib/python2.7/dist-packages/gnutls/library/__init__.py && \
+	  sudo PYTHONPATH=. testify/testify \
+	    mail/test/sendAuth \
+	    mail/test/sendTlsAuth \
+	    mail/test/submitAuth \
+	    mail/test/submitTlsAuth; \
+	  bash'\'
 
 .PHONY: test
