@@ -49,6 +49,11 @@ test/dns:
 	  test/spf \
 	  test/srv
 
+test/http:
+	testify \
+	  test/http \
+	  test/httpAuth
+
 test/relay: aws
 	$(call retry,(cd .. && find mail untwisted -name \*.py | xargs tar c \
 	  mail/test/sendAuth \
@@ -72,4 +77,4 @@ test/relay: aws
 	    mail/test/submitTlsAuth; \
 	  bash'\'
 
-.PHONY: test
+.PHONY: test test/http
