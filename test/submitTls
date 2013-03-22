@@ -7,11 +7,11 @@ from untwisted import smtp, tcp
 
 expect(1)
 
+host = os.environ.get('LC_HOST', 'mail.nottheoilrig.com')
+
 @sdfg
 @promise.resume
 def _():
-  host = os.environ.get('HOST', 'mail.nottheoilrig.com')
-
   connect = tcp.connect(host, 'submission')
 
   client = type.__call__(smtp.client, (yield connect()))
