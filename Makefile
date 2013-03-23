@@ -35,26 +35,26 @@ aws:
 	# Get hostname
 	$(eval HOSTNAME=$(shell ec2-describe-instances $(INSTANCE) | awk '/^INSTANCE/ { print $$4 }'))
 
-test:
+check:
 	testify \
 	  test/send \
 	  test/sendTls \
 	  test/submit \
 	  test/submitTls
 
-test/dns:
+check-dns:
 	testify \
 	  test/dkim \
 	  test/mx \
 	  test/spf \
 	  test/srv
 
-test/http:
+check-http:
 	testify \
 	  test/http \
 	  test/httpAuth
 
-test/relay: aws
+check-relay: aws
 	$(call retry,(cd .. && find mail untwisted -name \*.py | xargs tar c \
 	  mail/test/sendAuth \
 	  mail/test/sendTlsAuth \
@@ -77,5 +77,3 @@ test/relay: aws
 	    mail/test/submitAuth \
 	    mail/test/submitTlsAuth; \
 	  bash'\'
-
-.PHONY: test test/http
