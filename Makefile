@@ -37,10 +37,11 @@ aws:
 
 check:
 	testify \
-	  test/send \
-	  test/sendTls \
-	  test/submit \
-	  test/submitTls
+	  test/imap \
+	  test/smtp \
+	  test/smtpTls \
+	  test/submission \
+	  test/submissionTls
 
 check-dns:
 	testify \
@@ -56,10 +57,10 @@ check-http:
 
 check-relay: aws
 	$(call retry,(cd .. && find mail untwisted -name \*.py | xargs tar c \
-	  mail/test/sendAuth \
-	  mail/test/sendTlsAuth \
-	  mail/test/submitAuth \
-	  mail/test/submitTlsAuth \
+	  mail/test/smtpAuth \
+	  mail/test/smtpTlsAuth \
+	  mail/test/submissionAuth \
+	  mail/test/submissionTlsAuth \
 	  qwer/__init__.py \
 	  testify/__init__.py \
 	  testify/testify) | $(SSH) tar x)
@@ -72,8 +73,8 @@ check-relay: aws
 	    /gcry_control(GCRYCTL_SET_THREAD_CBS,/ a \
     libgnutls.gcry_check_version('\'\\\'\\\\\\\'1.2.4\\\\\\\'\\\'\'') # GNUTLS_MIN_LIBGCRYPT_VERSION'\'\\\'\'' /usr/lib/python2.7/dist-packages/gnutls/library/__init__.py && \
 	  sudo PYTHONPATH=. testify/testify \
-	    mail/test/sendAuth \
-	    mail/test/sendTlsAuth \
-	    mail/test/submitAuth \
-	    mail/test/submitTlsAuth; \
+	    mail/test/smtpAuth \
+	    mail/test/smtpTlsAuth \
+	    mail/test/submissionAuth \
+	    mail/test/submissionTlsAuth; \
 	  bash'\'
