@@ -38,9 +38,12 @@ aws:
 check:
 	testify \
 	  test/imap \
+	  test/imapNotPassword \
 	  test/smtp \
+	  test/smtpNotPassword \
 	  test/smtpTls \
 	  test/submission \
+	  test/submissionNotPassword \
 	  test/submissionTls
 
 check-dns:
@@ -53,6 +56,7 @@ check-dns:
 check-http:
 	testify \
 	  test/http \
+	  test/httpNotPassword \
 	  test/httpAuth
 
 check-relay: aws
