@@ -10,7 +10,13 @@ endef
 all: aws
 	$(call retry,(cd files && find . -type f | xargs tar c) | $(SSH) cd / \&\& sudo tar x)
 
-	$(SSH) byobu new-session '" \
+	(cd .. && find untwisted -name \*.py | xargs tar c \
+	  cookie/cookie \
+	  cookie/Makefile \
+	  qwer/__init__.py) | $(SSH) tar x
+
+	$(SSH) byobu new-session \'' \
+\
 	  sudo DEBIAN_FRONTEND=noninteractive aptitude -DRy install \
 	    apache2 \
 	    dbmail-mysql \
@@ -22,8 +28,13 @@ all: aws
 	    postfix \
 	    python-mysqldb \
 	    python-twisted && \
-	  $(MAKE); \
-	  bash"'
+\
+	  $(MAKE) && \
+\
+	  $(MAKE) -C cookie && \
+	  byobu new-window "PYTHONPATH=. cookie/cookie; bash"; \
+\
+	  bash'\'
 
 aws:
 	# Get latest Ubuntu AMI
@@ -70,15 +81,19 @@ check-relay: aws
 	  testify/testify) | $(SSH) tar x)
 
 	$(SSH) byobu new-session \'' \
+\
 	  sudo aptitude -DRy install \
 	    python-gnutls \
 	    python-twisted && \
+\
 	  sudo sed -i '\'\\\'\''# \
 	    /gcry_control(GCRYCTL_SET_THREAD_CBS,/ a \
     libgnutls.gcry_check_version('\'\\\'\\\\\\\'1.2.4\\\\\\\'\\\'\'') # GNUTLS_MIN_LIBGCRYPT_VERSION'\'\\\'\'' /usr/lib/python2.7/dist-packages/gnutls/library/__init__.py && \
+\
 	  sudo PYTHONPATH=. testify/testify \
 	    mail/test/smtpAuth \
 	    mail/test/smtpTlsAuth \
 	    mail/test/submissionAuth \
 	    mail/test/submissionTlsAuth; \
+\
 	  bash'\'
