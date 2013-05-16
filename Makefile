@@ -13,6 +13,7 @@ all: aws
 	(cd .. && find untwisted -name \*.py | xargs tar c \
 	  cookie/cookie \
 	  cookie/Makefile \
+	  mail/deliver \
 	  qwer/__init__.py) | $(SSH) tar x
 
 	$(SSH) byobu new-session \'' \
@@ -30,6 +31,8 @@ all: aws
 	    python-twisted && \
 \
 	  $(MAKE) && \
+\
+	  byobu new-window "PYTHONPATH=. mail/deliver; bash" && \
 \
 	  $(MAKE) -C cookie && \
 	  byobu new-window "PYTHONPATH=. cookie/cookie; bash"; \
