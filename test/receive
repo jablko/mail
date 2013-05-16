@@ -2,6 +2,7 @@
 
 # Send a message to SMTP server and verify it was delivered to IMAP server
 
+import os
 from mail.test import *
 from twisted.internet import protocol
 from twisted.mail import imap4
@@ -9,10 +10,12 @@ from untwisted import smtp, tcp
 
 expect(1)
 
+host = os.environ.get('LC_HOST', 'mail.nottheoilrig.com')
+
 @sdfg
 @promise.resume
 def _():
-  connect = tcp.connect('mail.nottheoilrig.com', 'smtp')
+  connect = tcp.connect(host, 'smtp')
 
   #@...
   @untwisted.identity(connect().then)
@@ -83,6 +86,6 @@ def _():
               else:
                 ctx.logout()
 
-  reactor.connectTCP('mail.nottheoilrig.com', 'imap', factory)
+  reactor.connectTCP(host, 'imap', factory)
 
   yield promise.promise()
