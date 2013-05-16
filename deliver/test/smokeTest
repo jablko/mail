@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+
+import untwisted
+from testify import *
+from twisted.internet import reactor
+from untwisted import promise, tcp
+
+expect(13)
+
+listen = tcp.listen(24)
+
+connect = tcp.connect('localhost', 8716)
+
+#@...
+@untwisted.identity(listen().then)
+@promise.resume
+def server(transport):
+  transport.write('220\r\n')
+
+  equal('LHLO example.com\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('250\r\n')
+
+  equal('MAIL FROM:<alice@example.com>\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('250\r\n')
+
+  equal('RCPT TO:<nottheoilrig>\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('250\r\n')
+
+  equal('DATA\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('354\r\n')
+
+  equal('Expect\r\n.\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('250\r\n')
+
+  equal('QUIT\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('221\r\n')
+
+#@...
+@untwisted.identity(connect().then)
+@promise.resume
+def client(transport):
+  equal('220\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('LHLO example.com\r\n')
+
+  equal('250\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('MAIL FROM:<alice@example.com>\r\n')
+
+  equal('250\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('RCPT TO:<bob@example.com>\r\n')
+
+  equal('250\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('DATA\r\n')
+
+  equal('354 Start mail input; end with <CRLF>.<CRLF>\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('Expect\r\n.\r\n')
+
+  equal('250\r\n', (yield transport.protocol.dataReceived.shift()))
+
+  transport.write('QUIT\r\n')
+
+  equal('221\r\n', (yield transport.protocol.dataReceived.shift()))
+
+# Test complete whether success or exception
+client.then(promise.promise()).then(lambda _: reactor.stop())
+
+reactor.run()
