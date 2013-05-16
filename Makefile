@@ -70,12 +70,12 @@ check-http:
 	  test/httpNotPassword \
 	  test/httpAuth
 
-check-relay: aws
+check-send: aws
 	$(call retry,(cd .. && find mail untwisted -name \*.py | xargs tar c \
-	  mail/test/smtpAuth \
-	  mail/test/smtpTlsAuth \
-	  mail/test/submissionAuth \
-	  mail/test/submissionTlsAuth \
+	  mail/test/smtpSend \
+	  mail/test/smtpTlsSend \
+	  mail/test/submissionSend \
+	  mail/test/submissionTlsSend \
 	  qwer/__init__.py \
 	  testify/__init__.py \
 	  testify/testify) | $(SSH) tar x)
@@ -91,9 +91,9 @@ check-relay: aws
     libgnutls.gcry_check_version('\'\\\'\\\\\\\'1.2.4\\\\\\\'\\\'\'') # GNUTLS_MIN_LIBGCRYPT_VERSION'\'\\\'\'' /usr/lib/python2.7/dist-packages/gnutls/library/__init__.py && \
 \
 	  sudo PYTHONPATH=. testify/testify \
-	    mail/test/smtpAuth \
-	    mail/test/smtpTlsAuth \
-	    mail/test/submissionAuth \
-	    mail/test/submissionTlsAuth; \
+	    mail/test/smtpSend \
+	    mail/test/smtpTlsSend \
+	    mail/test/submissionSend \
+	    mail/test/submissionTlsSend; \
 \
 	  bash'\'
