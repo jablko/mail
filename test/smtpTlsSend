@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Listen on local SMTP port, send a message to remote SMTP server with TLS and
+# authentication and verify it is relayed
+
 import base64, os, socket
 from mail.test import *
 from mail.test import rfc4871, tls

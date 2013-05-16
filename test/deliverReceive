@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Connect to LMTP port on localhost, deliver a message and verify that it was
+# delivered to IMAP server
+
 from mail.test import *
 from twisted.internet import protocol
 from twisted.mail import imap4

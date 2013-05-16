@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Lookup DNS SRV record
+
 from mail.test import *
 from untwisted import dns
 

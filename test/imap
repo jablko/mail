@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Connect to IMAP server and verify there's an error without authentication
+
 import os
 from mail.test import *
 from twisted.internet import protocol

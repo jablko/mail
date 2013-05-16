@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Send a message to SMTP server and verify it was delivered to IMAP server
+
 from mail.test import *
 from twisted.internet import protocol
 from twisted.mail import imap4

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Listen on Postfix smtpd_proxy_filter port, send a message to SMTP server on
+# localhost and verify it is passed to smtpd_proxy_filter with protocol ESMPT
+
 from mail.test import *
 from qwer import *
 from untwisted import rfc5234, rfc5321, rfc5322, smtp, tcp

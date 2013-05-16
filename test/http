@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Make HTTP request and verify it's denied without authentication
+
 import os
 from mail.test import *
 from twisted.internet import protocol

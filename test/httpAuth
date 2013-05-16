@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Make HTTP request with authentication and verify it's allowed
+
 import base64, os
 from mail.test import *
 from twisted.internet import protocol

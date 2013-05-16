@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Listen on Postfix smtpd_proxy_filter port, send a message to SMTP server on
+# localhost with TLS and authentication and verify it is passed to
+# smtpd_proxy_filter with protocol ESMPTSA
+
 import base64
 from mail.test import *
 from mail.test import tls
