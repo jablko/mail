@@ -1,7 +1,7 @@
 all:
-	mysql -u root -e 'grant all on dbmail.* to dbmail@localhost'
-	mysql -u root -e 'create database dbmail character set utf8'
-	zcat /usr/share/doc/dbmail-mysql/examples/create_tables.mysql.gz | mysql -u dbmail dbmail
+	mysql -u root -e 'GRANT ALL ON dbmail.* TO dbmail@localhost'
+	mysqladmin -u root create dbmail
+	zcat /usr/share/doc/dbmail/examples/create_tables.mysql.gz | mysql -u dbmail dbmail
 
 	sudo sed -i '
 	  /^mydestination = / d

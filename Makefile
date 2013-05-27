@@ -20,7 +20,6 @@ all: aws
 \
 	  sudo DEBIAN_FRONTEND=noninteractive aptitude -DRy install \
 	    apache2 \
-	    dbmail-mysql \
 	    libaprutil1-dbd-mysql \
 	    libsasl2-modules-sql \
 	    make \
@@ -28,7 +27,15 @@ all: aws
 	    opendkim \
 	    postfix \
 	    python-mysqldb \
-	    python-twisted && \
+	    python-twisted \
+\
+	    libevent-pthreads-2.0-5 \
+	    libgmime-2.6-0 \
+	    libmhash2 \
+	    libsieve2-1 && \
+	  sudo dpkg -i \
+	    dbmail_3.0.2-1_amd64.deb \
+	    libzdb9_2.11.2-1_amd64.deb && \
 \
 	  $(MAKE) && \
 \
