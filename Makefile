@@ -76,6 +76,7 @@ check-http:
 
 check-send: aws
 	$(call retry,(cd .. && find mail untwisted -name \*.py | xargs tar c \
+	  mail/test/ehlo \
 	  mail/test/smtpSend \
 	  mail/test/smtpTlsSend \
 	  mail/test/submissionSend \
@@ -95,6 +96,7 @@ check-send: aws
     libgnutls.gcry_check_version('\'\\\'\\\\\\\'1.2.4\\\\\\\'\\\'\'') # GNUTLS_MIN_LIBGCRYPT_VERSION'\'\\\'\'' /usr/lib/python2.7/dist-packages/gnutls/library/__init__.py && \
 \
 	  sudo PYTHONPATH=. testify/testify \
+	    mail/test/ehlo \
 	    mail/test/smtpSend \
 	    mail/test/smtpTlsSend \
 	    mail/test/submissionSend \
