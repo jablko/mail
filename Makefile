@@ -37,6 +37,10 @@ all: aws
 	    dbmail_3.0.2-1_amd64.deb \
 	    libzdb9_2.11.2-1_amd64.deb && \
 \
+	  mysql -u root -e "GRANT ALL ON dbmail.* TO dbmail@localhost" && \
+	  mysqladmin -u root create dbmail && \
+	  zcat /usr/share/doc/dbmail/examples/create_tables.mysql.gz | mysql -u dbmail dbmail && \
+\
 	  $(MAKE) && \
 \
 	  byobu new-window "PYTHONPATH=. mail/deliver/deliver; bash" && \

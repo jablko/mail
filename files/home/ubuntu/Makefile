@@ -1,8 +1,4 @@
 all:
-	mysql -u root -e 'GRANT ALL ON dbmail.* TO dbmail@localhost'
-	mysqladmin -u root create dbmail
-	zcat /usr/share/doc/dbmail/examples/create_tables.mysql.gz | mysql -u dbmail dbmail
-
 	sudo sed -i '
 	  /^mydestination = / d
 	  s/^myhostname = .*/myhostname = mail.nottheoilrig.com' /etc/postfix/main.cf
