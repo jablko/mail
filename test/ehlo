@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 
-import base64, socket
+# Listen on local SMTP port, send a message to remote SMTP server and verify
+# the server identifies itself when it relays the message (the domain must be
+# resolvable, #1)
+
+import base64, os, socket
 from mail.test import *
 from untwisted import smtp, tcp
 
 expect(1)
+
+host = os.environ.get('LC_HOST', 'mail.nottheoilrig.com')
 
 # Cache our domain
 domain = socket.getfqdn()
@@ -58,7 +64,7 @@ def _():
     while True:
       ok(False, (yield listen()))
 
-  connect = tcp.connect('mail.nottheoilrig.com', 'smtp')
+  connect = tcp.connect(host, 'smtp')
 
   #@...
   @untwisted.identity(connect().then)
