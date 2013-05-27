@@ -53,6 +53,7 @@ check:
 	testify \
 	  test/imap \
 	  test/imapNotPassword \
+	  test/receive \
 	  test/smtp \
 	  test/smtpNotPassword \
 	  test/smtpTls \
