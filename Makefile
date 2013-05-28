@@ -40,6 +40,9 @@ all: aws
 	  mysql -u root -e "GRANT ALL ON dbmail.* TO dbmail@localhost" && \
 	  mysqladmin -u root create dbmail && \
 	  zcat /usr/share/doc/dbmail/examples/create_tables.mysql.gz | mysql -u dbmail dbmail && \
+	  sudo sed -i " \
+	    s/^\(driver *=\).*/\1 mysql/; \
+	    s/^\(authdriver *=\).*/\1 sql/" /etc/dbmail/dbmail.conf && \
 \
 	  $(MAKE) && \
 \
