@@ -1,9 +1,4 @@
 all:
-	echo "\n\
-Domain nottheoilrig.com\n\
-KeyFile /home/ubuntu/default.private\n\
-Selector mail" | sudo sh -c 'cat >> /etc/opendkim.conf'
-
 	sudo a2enmod authn_dbd proxy_http
 
 	sudo sed -i '# \

@@ -71,6 +71,12 @@ virtual_transport = lmtp:localhost:8716'\'\\\'\'' /etc/postfix/main.cf && \
   -o smtpd_authorized_xforward_hosts=localhost\
   -o smtpd_milters=unix:/var/run/opendkim/opendkim.sock'\'\\\'\'' | sudo sed -f - -i /etc/postfix/master.cf && \
 \
+	  # OpenDKIM \
+	  echo "\n\
+Domain nottheoilrig.com\n\
+KeyFile /home/ubuntu/default.private\n\
+Selector mail" | sudo sh -c "cat >> /etc/opendkim.conf" && \
+\
 	  $(MAKE) && \
 \
 	  byobu new-window "PYTHONPATH=. mail/deliver/deliver; bash" && \
