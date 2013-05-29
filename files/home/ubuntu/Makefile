@@ -1,35 +1,4 @@
 all:
-	sudo sed -i '
-	  /^mydestination = / d
-	  s/^myhostname = .*/myhostname = mail.nottheoilrig.com' /etc/postfix/main.cf
-	echo "\n\
-virtual_mailbox_domains = nottheoilrig.com\n\
-virtual_transport = lmtp:localhost:8716" | sudo sh -c 'cat >> /etc/postfix/main.cf'
-
-	sudo sed -i '
-	  h
-	  s/^smtp      inet  n       -       -/smtp      inet  n       -       n/
-	  T
-	  p
-	  i\
-  -o smtpd_proxy_filter=localhost:1438\
-  -o smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated,reject_unauth_destination\
-  -o smtpd_sasl_auth_enable=yes
-	  s/^smtp/submission/
-	  p
-	  i\
-  -o smtpd_proxy_filter=localhost:1438\
-  -o smtpd_recipient_restrictions=permit_sasl_authenticated,reject\
-  -o smtpd_sasl_auth_enable=yes
-	  g
-	  s/^smtp/localhost:1894/
-	  a\
-  -o smtpd_authorized_xforward_hosts=localhost\
-  -o smtpd_milters=inet:localhost:8891' /etc/postfix/master.cf
-	sudo sed -i '
-	  /^lmtp/ a\
-  -o disable_dns_lookups=yes' /etc/postfix/master.cf
-
 	echo "\n\
 Domain nottheoilrig.com\n\
 KeyFile /home/ubuntu/default.private\n\
