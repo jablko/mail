@@ -76,6 +76,7 @@ virtual_transport = lmtp:localhost:8716'\'\\\'\'' /etc/postfix/main.cf && \
 Domain nottheoilrig.com\n\
 KeyFile /home/ubuntu/default.private\n\
 Selector mail" | sudo sh -c "cat >> /etc/opendkim.conf" && \
+	  sudo adduser postfix opendkim && \
 \
 	  $(MAKE) && \
 \
