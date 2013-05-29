@@ -85,9 +85,7 @@ Selector mail" | sudo sh -c "cat >> /etc/opendkim.conf" && \
 	  byobu new-window "PYTHONPATH=. mail/deliver/deliver; bash" && \
 \
 	  $(MAKE) -C cookie && \
-	  byobu new-window "PYTHONPATH=. cookie/cookie; bash"; \
-\
-	  bash'\'
+	  byobu new-window "PYTHONPATH=. cookie/cookie; bash"; bash'\'
 
 aws:
 	# Get latest Ubuntu AMI
@@ -150,6 +148,4 @@ check-send: aws
 	    mail/test/smtpSend \
 	    mail/test/smtpTlsSend \
 	    mail/test/submissionSend \
-	    mail/test/submissionTlsSend; \
-\
-	  bash'\'
+	    mail/test/submissionTlsSend; bash'\'
