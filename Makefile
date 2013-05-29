@@ -78,7 +78,9 @@ KeyFile /home/ubuntu/default.private\n\
 Selector mail" | sudo sh -c "cat >> /etc/opendkim.conf" && \
 	  sudo adduser postfix opendkim && \
 \
-	  $(MAKE) && \
+	  # Apache \
+	  sudo a2enmod authn_dbd proxy_http && \
+	  sudo apache2ctl restart && \
 \
 	  byobu new-window "PYTHONPATH=. mail/deliver/deliver; bash" && \
 \
