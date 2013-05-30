@@ -8,7 +8,7 @@ define retry
 endef
 
 all: aws
-	$(call retry,(cd files && find . -type f | xargs tar c) | $(SSH) cd / \&\& sudo tar x)
+	$(call retry,(cd files && find . -type f | xargs tar c) | $(SSH) cd / \&\& sudo tar x --no-same-owner)
 
 	(cd .. && find untwisted -name \*.py | xargs tar c \
 	  cookie/cookie \
