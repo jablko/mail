@@ -6,6 +6,10 @@ all:
 	sudo sed -i ' #\
 	  s/^\(driver *=\).*/\1 mysql/ #\
 	  s/^\(authdriver *=\).*/\1 sql/' /etc/dbmail/dbmail.conf
+	sudo sed -i ' #\
+	  s/^#START_IMAPD=true/START_IMAPD=true/ #\
+	  s/^#START_LMTPD=true/START_LMTPD=true/' /etc/default/dbmail
+	sudo invoke-rc.d dbmail restart
 
 	# Postfix
 	sudo sed -i ' #\
