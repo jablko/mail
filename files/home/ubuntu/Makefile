@@ -36,6 +36,7 @@ virtual_transport = lmtp:localhost:8716' /etc/postfix/main.cf
 	  a \
   -o smtpd_authorized_xforward_hosts=localhost\
   -o smtpd_milters=unix:/var/run/opendkim/opendkim.sock' | sudo sed -f - -i /etc/postfix/master.cf
+	sudo postfix reload
 
 	# OpenDKIM
 	echo "\n\
