@@ -24,13 +24,11 @@ virtual_transport = lmtp:localhost:8716' /etc/postfix/main.cf
 	  p #\
 	  i \
   -o smtpd_proxy_filter=:1438\
-  -o smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated,reject_unauth_destination\
   -o smtpd_sasl_auth_enable=yes\n #\
 	  s/^smtp/submission/ #\
 	  p #\
 	  i \
   -o smtpd_proxy_filter=:1438\
-  -o smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated,reject_unauth_destination\
   -o smtpd_sasl_auth_enable=yes\n #\
 	  s/^submission/localhost:1894/ #\
 	  a \
