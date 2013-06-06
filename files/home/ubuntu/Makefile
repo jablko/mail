@@ -1,5 +1,5 @@
-all:
-	# DBMail
+all:: dbmail
+dbmail:
 	mysql -u root -e 'GRANT ALL ON dbmail.* TO dbmail@localhost'
 	mysqladmin -u root create dbmail
 	zcat /usr/share/doc/dbmail/examples/create_tables.mysql.gz | mysql -u dbmail dbmail
@@ -11,7 +11,8 @@ all:
 	  s/^#START_LMTPD=true/START_LMTPD=true/' /etc/default/dbmail
 	sudo invoke-rc.d dbmail restart
 
-	# Postfix
+all:: postfix
+postfix:
 	sudo sed -i ' #\
 	  s/^myhostname =.*/myhostname = mail.nottheoilrig.com/ #\
 	  $$ a \
@@ -36,7 +37,8 @@ virtual_transport = lmtp:localhost:8716' /etc/postfix/main.cf
   -o smtpd_milters=unix:/var/run/opendkim/opendkim.sock' | sudo sed -f - -i /etc/postfix/master.cf
 	sudo postfix reload
 
-	# OpenDKIM
+all:: opendkim
+opendkim:
 	echo "\n\
 Domain nottheoilrig.com\n\
 KeyFile /run/opendkim/default.private\n\
@@ -44,11 +46,13 @@ Selector mail" | sudo sh -c 'cat >> /etc/opendkim.conf'
 	sudo invoke-rc.d opendkim restart
 	sudo adduser postfix opendkim
 
-	# Apache
+all:: apache
+apache:
 	sudo a2enmod authn_dbd proxy_http
 	sudo apache2ctl restart
 
-	# Cacti
+all:: cacti
+cacti:
 	wget http://cacti.net/downloads/cacti-0.8.8a.tar.gz
 	sudo mkdir /var/www/cacti
 	(cd /var/www/cacti && \
