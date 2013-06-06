@@ -1,6 +1,12 @@
 DBDriver mysql
 DBDParams dbname=dbmail,user=dbmail
 
+<Location /cacti>
+
+  ProxyPass !
+
+</Location>
+
 <Location />
 
   AuthBasicProvider dbd

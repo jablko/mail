@@ -1,0 +1,1 @@
+*/5 * * * * www-data php --define suhosin.memory_limit=512M /var/www/cacti/poller.php > /dev/null

@@ -25,9 +25,13 @@ all: aws
 	    make \
 	    mysql-server \
 	    opendkim \
+	    php5 \
+	    php5-cli \
+	    php5-mysql \
 	    postfix \
 	    python-mysqldb \
 	    python-twisted \
+	    rrdtool \
 \
 	    libevent-pthreads-2.0-5 \
 	    libgmime-2.6-0 \
